@@ -571,9 +571,8 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                 return
             }
             _setExclusionPaths(newValue)
-            if let paths = newValue {
-                _innerContainer.exclusionPaths = paths
-            }
+            _innerContainer.exclusionPaths = newValue
+            
             if _innerContainer.isVerticalForm {
                 let trans = CGAffineTransform(translationX: _innerContainer.size.width - bounds.size.width, y: 0)
                 (_innerContainer.exclusionPaths as NSArray?)?.enumerateObjects({ path, idx, stop in
