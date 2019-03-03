@@ -1,4 +1,2 @@
 language: swift
-xcode_project: ./Framework/BSText.xcodeproj
-xcode_scheme: BSText
-osx_image: xcode10.1
+script: true
