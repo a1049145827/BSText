@@ -513,7 +513,6 @@ See `Demo/BSTextDemo.xcodeproj` for more examples:
 
 <img src="https://raw.github.com/a1049145827/BSText/master/Demo/DemoSnapshot/text_path.gif" width="320">
 <img src="https://raw.github.com/a1049145827/BSText/master/Demo/DemoSnapshot/text_markdown.gif" width="320">
-<br/> <br/>
 <img src="https://raw.github.com/a1049145827/BSText/master/Demo/DemoSnapshot/text_vertical.gif" width="320">
 <img src="https://raw.github.com/a1049145827/BSText/master/Demo/DemoSnapshot/text_paste.gif" width="320">
 
