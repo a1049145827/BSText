@@ -243,8 +243,8 @@ extension String {
     }
     
     func subString(start: Int, end: Int) -> String {
-        let startIndex = String.Index.init(encodedOffset: start)
-        let endIndex = String.Index.init(encodedOffset: end)
+        let startIndex = utf16.index(utf16.startIndex, offsetBy: start)
+        let endIndex = utf16.index(utf16.startIndex, offsetBy: end)
         return String(self[startIndex..<endIndex])
     }
     
