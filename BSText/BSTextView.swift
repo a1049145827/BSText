@@ -2296,7 +2296,8 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             }
             var newRange = NSRange(location: 0, length: 0)
             // fixbug 修复连续输入 Emoji 时出现的乱码的问题，原因：NSString 中 Emoji 表情的 length 等于2，而 Swift 中 Emoji 的 Count 等于1，_innerText 继承于 NSString，所以此处用 (text as NSString).length
-            newRange.location = _selectedTextRange.start.offset + (text as NSString).length
+            // now use text.utf16.count replace (text as NSString).length
+            newRange.location = _selectedTextRange.start.offset + text.utf16.count
             _selectedTextRange = TextRange(range: newRange)
             if notify {
                 _inputDelegate?.selectionDidChange(self)
