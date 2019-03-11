@@ -6,17 +6,20 @@ target 'BSTextDemo' do
   # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
   use_frameworks!
 
+def common
+    pod 'BSText', :path => "../BSText.podspec"
+    pod 'YYWebImage'
+end
+
   # Pods for BSTextDemo
-  pod 'BSText'
-  pod 'YYWebImage'
+  common
 
   target 'BSTextDemoTests' do
 #    inherit! :search_paths
     # Pods for testing
     use_frameworks!
     
-    pod 'BSText'
-    pod 'YYWebImage'
+    common
 
   end
 
@@ -25,8 +28,7 @@ target 'BSTextDemo' do
     # Pods for testing
     use_frameworks!
     
-    pod 'BSText'
-    pod 'YYWebImage'
+    common
 
   end
 
