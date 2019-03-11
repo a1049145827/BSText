@@ -931,13 +931,15 @@ open class BSLabel: UIView, TextDebugTarget, TextAsyncLayerDelegate, NSSecureCod
             }
         }
         let highlightRange = NSRangePointer.allocate(capacity: 1)
+        defer {
+            highlightRange.deallocate()
+        }
         
         guard let highlight = innerText.attribute(NSAttributedString.Key(rawValue: TextAttribute.textHighlightAttributeName), at: startIndex, longestEffectiveRange: highlightRange, in: NSRange(location: 0, length: innerText.length)) as? TextHighlight else {
             return nil
         }
         
         range?.pointee = highlightRange.pointee
-        highlightRange.deallocate()
         
         return highlight
     }

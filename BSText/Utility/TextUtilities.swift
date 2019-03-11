@@ -381,6 +381,10 @@ public class TextUtilities: NSObject {
         // 这样写个数不受限制
         let pivot = UnsafeMutablePointer<__CLPK_integer>.allocate(capacity: matrix.count)
         let workspace = UnsafeMutablePointer<Double>.allocate(capacity: matrix.count)
+        defer {
+            pivot.deallocate()
+            workspace.deallocate()
+        }
         
         var error: __CLPK_integer = 0
         
@@ -395,8 +399,6 @@ public class TextUtilities: NSObject {
         }
         
         dgetri_(&m, &matrix, &lda, pivot, workspace, &n, &error)
-        pivot.deallocate()
-        workspace.deallocate()
         
         return Int(error)
     }

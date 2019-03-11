@@ -1958,6 +1958,9 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             }
         }
         let highlightRange = NSRangePointer.allocate(capacity: 1)
+        defer {
+            highlightRange.deallocate()
+        }
         let text = _delectedText ?? _innerText
         guard let highlight = text.attribute(NSAttributedString.Key(rawValue: TextAttribute.textHighlightAttributeName), at: startIndex, longestEffectiveRange: highlightRange, in: NSRange(location: 0, length: _innerText.length)) as? TextHighlight else {
             return nil
@@ -1980,7 +1983,6 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         }
         
         range?.pointee = highlightRange.pointee
-        highlightRange.deallocate()
         
         return highlight
     }
@@ -4137,10 +4139,12 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         let paraStyle = (attrs![NSAttributedString.Key.paragraphStyle]) as! CTParagraphStyle?
         if paraStyle != nil {
             let baseWritingDirection = UnsafeMutablePointer<CTWritingDirection>.allocate(capacity: 1)
+            defer {
+                baseWritingDirection.deallocate()
+            }
             if CTParagraphStyleGetValueForSpecifier(paraStyle!, CTParagraphStyleSpecifier.baseWritingDirection, MemoryLayout<CTWritingDirection>.size, baseWritingDirection) {
                 return (UITextWritingDirection(rawValue: Int(baseWritingDirection.pointee.rawValue)))!
             }
-            baseWritingDirection.deallocate()
         }
         
         return .natural

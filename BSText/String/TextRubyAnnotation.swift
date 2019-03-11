@@ -83,6 +83,9 @@ public class TextRubyAnnotation: NSObject, NSCopying, NSCoding, NSSecureCoding {
         
         let hiragana = (textBefore ?? "") as CFString
         let furigana: UnsafeMutablePointer<CFTypeRef> = UnsafeMutablePointer<CFTypeRef>.allocate(capacity: Int(CTRubyPosition.count.rawValue))
+        defer {
+            furigana.deallocate()
+        }
 
         furigana.initialize(repeating: ("" as CFString), count: 4)
         furigana[Int(CTRubyPosition.before.rawValue)] = hiragana
@@ -94,8 +97,6 @@ public class TextRubyAnnotation: NSObject, NSCopying, NSCoding, NSSecureCoding {
         furigana.withMemoryRebound(to: Optional<Unmanaged<CFString>>.self, capacity: 4) { ptr in
             ruby = CTRubyAnnotationCreate(alignment, overhang, sizeFactor, ptr)
         }
-        
-        furigana.deallocate()
         
         return ruby
     }
