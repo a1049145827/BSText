@@ -65,10 +65,13 @@ extension String {
     }
     
     public func subString(start: Int, end: Int) -> String {
+        #if swift(>=5.0)
+        let startIndex = String.Index(utf16Offset: start, in: self)
+        let endIndex = String.Index(utf16Offset: end, in: self)
+        #else
         let startIndex = String.Index.init(encodedOffset: start)
         let endIndex = String.Index.init(encodedOffset: end)
-//        let startIndex = String.Index(utf16Offset: start, in: self)
-//        let endIndex = String.Index(utf16Offset: end, in: self)
+        #endif
         return String(self[startIndex..<endIndex])
     }
     

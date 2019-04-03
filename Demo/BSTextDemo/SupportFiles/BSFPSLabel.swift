@@ -31,7 +31,7 @@ class BSFPSLabel: UILabel {
     }
     private var subFont: UIFont?
     
-    private convenience init() {
+    public convenience init() {
         self.init(frame: .zero)
     }
 
