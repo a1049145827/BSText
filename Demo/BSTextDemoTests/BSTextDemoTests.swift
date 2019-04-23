@@ -53,7 +53,7 @@ class BSTextDemoTests: XCTestCase {
                 var value: UInt64 = 0
                 scanner.scanHexInt64(&value)
                 
-                let r = (value & 0xFF0000) >> 16, g = (value & 0x00FF00) >> 8, b = value & 0x0000FF, a = 1
+//                let r = (value & 0xFF0000) >> 16, g = (value & 0x00FF00) >> 8, b = value & 0x0000FF, a = 1
 //                print((value & 0xFF0000) >> 16, (value & 0x00FF00) >> 8, value & 0x0000FF, 0)
             }
         }
@@ -82,7 +82,7 @@ class BSTextDemoTests: XCTestCase {
         self.measure {
             for _ in 0..<10000 {
                 let value = 0xFF0066
-                let r = (value & 0xFF0000) >> 16, g = (value & 0x00FF00) >> 8, b = value & 0x0000FF, a = 1
+//                let r = (value & 0xFF0000) >> 16, g = (value & 0x00FF00) >> 8, b = value & 0x0000FF, a = 1
             }
         }
     }

@@ -1,9 +1,9 @@
 Pod::Spec.new do |spec|
   spec.name         = 'BSText'
-  spec.version      = '1.0.1'
+  spec.version      = '1.0.2'
   spec.platform     = :ios, '8.0'
   spec.ios.deployment_target = '8.0'
-  spec.swift_version = '4.2'
+  spec.swift_version = '5.0'
   spec.summary      = 'The Swift Version of YYText'
   spec.homepage     = 'https://github.com/a1049145827/BSText'
   spec.author       = { 'Geek Bruce' => 'a1049145827@hotmail.com' }
