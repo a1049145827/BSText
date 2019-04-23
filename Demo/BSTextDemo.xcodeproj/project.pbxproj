@@ -42,8 +42,8 @@
 		322E396421F81687004AC265 /* dribbble64_imageio.png in Resources */ = {isa = PBXBuildFile; fileRef = 322E394921F81687004AC265 /* dribbble64_imageio.png */; };
 		322E396521F81687004AC265 /* BSFPSLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322E394A21F81687004AC265 /* BSFPSLabel.swift */; };
 		AA6BBB3D6FE4996C5D548A02 /* Pods_BSTextDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5054A7D00FBF84BDFD3017C2 /* Pods_BSTextDemoTests.framework */; };
+		C70D65BAF91CCA8F4C3E7B0D /* Pods_BSTextDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B8BD8EF203494111144A38E /* Pods_BSTextDemo.framework */; };
 		C90AE6EBBAD352AE209F0A99 /* Pods_BSTextDemo_BSTextDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CAF7AD010B279A97139DCF15 /* Pods_BSTextDemo_BSTextDemoTests.framework */; };
-		D4FFC10A03A75999164EFABA /* Pods_BSTextDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B8BD8EF203494111144A38E /* Pods_BSTextDemo.framework */; };
 		EF889028B0FB03ED4C0A6DD9 /* Pods_BSTextDemo_BSTextDemoUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 66A27993C59CAFAB758644DC /* Pods_BSTextDemo_BSTextDemoUITests.framework */; };
 /* End PBXBuildFile section */
 
@@ -126,7 +126,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D4FFC10A03A75999164EFABA /* Pods_BSTextDemo.framework in Frameworks */,
+				C70D65BAF91CCA8F4C3E7B0D /* Pods_BSTextDemo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -430,7 +430,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-BSTextDemo-BSTextDemoUITests-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-BSTextDemoUITests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -452,7 +452,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-BSTextDemo-BSTextDemoTests-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-BSTextDemoTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -467,7 +467,7 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-BSTextDemo-BSTextDemoTests/Pods-BSTextDemo-BSTextDemoTests-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-BSTextDemoTests/Pods-BSTextDemoTests-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/BSText/BSText.framework",
 				"${BUILT_PRODUCTS_DIR}/YYCache/YYCache.framework",
 				"${BUILT_PRODUCTS_DIR}/YYImage/YYImage.framework",
@@ -484,7 +484,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BSTextDemo-BSTextDemoTests/Pods-BSTextDemo-BSTextDemoTests-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BSTextDemoTests/Pods-BSTextDemoTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		427D33AC19FD4AEA808A3DC2 /* [CP] Embed Pods Frameworks */ = {
@@ -495,7 +495,7 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-BSTextDemo-BSTextDemoUITests/Pods-BSTextDemo-BSTextDemoUITests-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-BSTextDemoUITests/Pods-BSTextDemoUITests-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/BSText/BSText.framework",
 				"${BUILT_PRODUCTS_DIR}/YYCache/YYCache.framework",
 				"${BUILT_PRODUCTS_DIR}/YYImage/YYImage.framework",
@@ -512,7 +512,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BSTextDemo-BSTextDemoUITests/Pods-BSTextDemo-BSTextDemoUITests-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BSTextDemoUITests/Pods-BSTextDemoUITests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		6DCC1E363937B164BE507AA3 /* [CP] Embed Pods Frameworks */ = {
@@ -772,7 +772,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 9J6JH9B3QM;
+				DEVELOPMENT_TEAM = 5FW9DTQ6YS;
 				INFOPLIST_FILE = BSTextDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -792,7 +792,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 9J6JH9B3QM;
+				DEVELOPMENT_TEAM = 5FW9DTQ6YS;
 				INFOPLIST_FILE = BSTextDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -808,7 +808,7 @@
 		};
 		322E38DF21F803D0004AC265 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3FDC73D36B8A6F54C9231CD1 /* Pods-BSTextDemo-BSTextDemoTests.debug.xcconfig */;
+			baseConfigurationReference = EB552C2702C5039614DA7878 /* Pods-BSTextDemoTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -830,7 +830,7 @@
 		};
 		322E38E021F803D0004AC265 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2ABC7F4A8E9563D3B24631CA /* Pods-BSTextDemo-BSTextDemoTests.release.xcconfig */;
+			baseConfigurationReference = F8C67BE16A815536737DFFCD /* Pods-BSTextDemoTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -852,7 +852,7 @@
 		};
 		322E38E221F803D0004AC265 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FCBE5C7A09245DCED8C99D28 /* Pods-BSTextDemo-BSTextDemoUITests.debug.xcconfig */;
+			baseConfigurationReference = DD75291E6782662B28378F8A /* Pods-BSTextDemoUITests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CODE_SIGN_STYLE = Automatic;
@@ -873,7 +873,7 @@
 		};
 		322E38E321F803D0004AC265 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 951BF733F9D4BE9CA2A1840B /* Pods-BSTextDemo-BSTextDemoUITests.release.xcconfig */;
+			baseConfigurationReference = BE5D86EDF16C4026139185D8 /* Pods-BSTextDemoUITests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				CODE_SIGN_STYLE = Automatic;

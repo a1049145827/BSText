@@ -15,7 +15,7 @@ end
   common
 
   target 'BSTextDemoTests' do
-#    inherit! :search_paths
+    inherit! :search_paths
     # Pods for testing
     use_frameworks!
     
@@ -24,7 +24,7 @@ end
   end
 
   target 'BSTextDemoUITests' do
-#    inherit! :search_paths
+    inherit! :search_paths
     # Pods for testing
     use_frameworks!
     
