@@ -130,6 +130,10 @@ class BSTextEditExample: UIViewController, TextViewDelegate, TextKeyboardObserve
         TextKeyboardManager.default.add(observer: self)
     }
     
+    override func viewWillLayoutSubviews() {
+        textView.size = view.size
+    }
+    
     private var exclusionPathEnabled: Bool {
         set(enabled) {
             if enabled {

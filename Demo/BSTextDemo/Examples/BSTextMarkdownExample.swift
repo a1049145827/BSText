@@ -39,7 +39,7 @@ class BSTextMarkdownExample: UIViewController, TextViewDelegate {
         textView.backgroundColor = UIColor(white: 0.134, alpha: 1.000)
         textView.contentInset = UIEdgeInsets(top: kNavHeight, left: 0, bottom: 0, right: 0)
         textView.scrollIndicatorInsets = textView.contentInset
-        textView.selectedRange = NSRange(location: text.count, length: 0)
+        textView.selectedRange = NSRange(location: text.length, length: 0)
         view.addSubview(textView)
     }
     

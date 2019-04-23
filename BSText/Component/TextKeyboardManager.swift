@@ -148,13 +148,13 @@ public class TextKeyboardManager: NSObject {
             let windowName = NSStringFromClass(type(of: window))
             if _systemVersion < 9 {
                 // UITextEffectsWindow
-                if windowName.count == 19 && windowName.hasPrefix("UI") && windowName.hasSuffix("TextEffectsWindow") {
+                if windowName.length == 19 && windowName.hasPrefix("UI") && windowName.hasSuffix("TextEffectsWindow") {
                     
                     kbWindows.append(window)
                 }
             } else {
                 // UIRemoteKeyboardWindow
-                if windowName.count == 22 && windowName.hasPrefix("UI") && windowName.hasSuffix("RemoteKeyboardWindow") {
+                if windowName.length == 22 && windowName.hasPrefix("UI") && windowName.hasSuffix("RemoteKeyboardWindow") {
                     
                     kbWindows.append(window)
                 }
@@ -326,7 +326,7 @@ public class TextKeyboardManager: NSObject {
         let windowName = NSStringFromClass(type(of: window))
         if _systemVersion < 9 {
             // UITextEffectsWindow
-            if windowName.count != 19 {
+            if windowName.length != 19 {
                 return nil
             }
             if !windowName.hasPrefix("UI") {
@@ -337,7 +337,7 @@ public class TextKeyboardManager: NSObject {
             }
         } else {
             // UIRemoteKeyboardWindow
-            if windowName.count != 22 {
+            if windowName.length != 22 {
                 return nil
             }
             if !windowName.hasPrefix("UI") {
@@ -352,7 +352,7 @@ public class TextKeyboardManager: NSObject {
         // UIInputSetContainerView
         for view: UIView in window.subviews {
             let viewName = NSStringFromClass(type(of: view))
-            if viewName.count != 23 {
+            if viewName.length != 23 {
                 continue
             }
             if !viewName.hasPrefix("UI") {
@@ -364,7 +364,7 @@ public class TextKeyboardManager: NSObject {
             // UIInputSetHostView
             for subView: UIView in view.subviews {
                 let subViewName = NSStringFromClass(type(of: subView))
-                if subViewName.count != 18 {
+                if subViewName.length != 18 {
                     continue
                 }
                 if !subViewName.hasPrefix("UI") {

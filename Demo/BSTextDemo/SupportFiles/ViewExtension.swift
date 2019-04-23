@@ -174,98 +174,79 @@ extension UIView {
 
 class Screen: NSObject {
     
-    /// 屏幕高度（竖向）
+    /// Screen Height With Portrait
     @objc static let height = max(UIScreen.main.bounds.size.width, UIScreen.main.bounds.size.height)
-    /// 屏幕宽度（竖向）
+    /// Screen Width With Portrait
     @objc static let width = min(UIScreen.main.bounds.size.width, UIScreen.main.bounds.size.height)
-    /// 屏幕尺寸（竖向）
+    /// Screen Size With Portrait
     @objc static let size = CGSize(width: width, height: height)
-    /// iOS系统版本号
-    @objc static let deviceSystemVersion = Double(UIDevice.current.systemVersion) ?? 0
 }
 
-@inline(__always) fileprivate func hexStrToInt(str: String?) -> Int {
-    
-    guard let input = str else {
-        return 0
-    }
-    
-    // Int(_, radix: ) can't deal with the '0x' prefix. NSScanner can handle hex
-    // with or without the '0x' prefix
-    let scanner = Scanner(string: input)
-    var value: Int = 0
-    
-    if scanner.scanInt(&value) {
-        print("Decimal: \(value)")
-        print("Hex: 0x\(String(value, radix: 16))")
-        return value
-    }
-    
-    return 0
-}
-
+/// Parse Hex String To RGBA Value
+///
+/// - Parameters:
+///   - str: Hex String
+///   - r: Memory Address for a CGFloat variable to receive the red value
+///   - g: Memory Address for a CGFloat variable to receive the green value
+///   - b: Memory Address for a CGFloat variable to receive the blue value
+///   - a: Memory Address for a CGFloat variable to receive the alpha value
+/// - Returns: Parse is success or not
 fileprivate func hexStrToRGBA(str: String?, r: UnsafeMutablePointer<CGFloat>?, g: UnsafeMutablePointer<CGFloat>?, b: UnsafeMutablePointer<CGFloat>?, a: UnsafeMutablePointer<CGFloat>?) -> Bool {
     
-    var r = r?.pointee
-    var g = g?.pointee
-    var b = b?.pointee
-    var a = a?.pointee
-    
-    print("\(String(describing: r)), \(String(describing: g)), \(String(describing: b)), \(String(describing: a))")
-    
-    // 不符合条件，直接返回黑色
-    guard var s = str?.uppercased(), s.count > 3 else {
+    guard var s = str?.uppercased(), s.length > 3 else {
+        // Not a Hex String
         return false
     }
     
-    let len = s.count
-    
     if s.hasPrefix("#") {
-        
-        s = String(s[s.range(from: NSRange(1...len))!])
+        s = s.subString(start: 1, end: s.length)
     } else if s.hasPrefix("0X") {
-        s = String(s[s.range(from: NSRange(2...len))!])
+        s = s.subString(start: 2, end: s.length)
     }
     
-    let length = s.count
+    let length = s.length
     
-    // 不符合条件，直接返回黑色
     // RGB, RGBA, RRGGBB, RRGGBBAA
     if length != 3 && length != 4 && length != 6 && length != 8 {
+        // Not a Hex String
         return false
     }
     
     // RGB, RGBA, RRGGBB, RRGGBBAA
     if length < 5 {
-        r = CGFloat(hexStrToInt(str: String(s[s.range(from: NSRange(0...1))!]))) / 255.0
-        g = CGFloat(hexStrToInt(str: String(s[s.range(from: NSRange(1...2))!]))) / 255.0
-        b = CGFloat(hexStrToInt(str: String(s[s.range(from: NSRange(2...3))!]))) / 255.0
+        r?.pointee = CGFloat((s.subString(start: 0, end: 1) + s.subString(start: 0, end: 1)).hexToInt()) / 255.0
+        g?.pointee = CGFloat((s.subString(start: 1, end: 2) + s.subString(start: 1, end: 2)).hexToInt()) / 255.0
+        b?.pointee = CGFloat((s.subString(start: 2, end: 3) + s.subString(start: 2, end: 3)).hexToInt()) / 255.0
         if length == 4 {
-            a = CGFloat(hexStrToInt(str: String(s[s.range(from: NSRange(3...4))!]))) / 255.0
+            a?.pointee = CGFloat((s.subString(start: 3, end: 4) + s.subString(start: 3, end: 4)).hexToInt()) / 255.0
         } else {
-            a = 1
+            a?.pointee = 1
         }
     } else {
-        r = CGFloat(hexStrToInt(str: String(s[s.range(from: NSRange(0...2))!]))) / 255.0
-        g = CGFloat(hexStrToInt(str: String(s[s.range(from: NSRange(2...4))!]))) / 255.0
-        b = CGFloat(hexStrToInt(str: String(s[s.range(from: NSRange(4...6))!]))) / 255.0
+        r?.pointee = CGFloat(s.subString(start: 0, end: 2).hexToInt()) / 255.0
+        g?.pointee = CGFloat(s.subString(start: 2, end: 4).hexToInt()) / 255.0
+        b?.pointee = CGFloat(s.subString(start: 4, end: 6).hexToInt()) / 255.0
         if length == 8 {
-            a = CGFloat(hexStrToInt(str: String(s[s.range(from: NSRange(6...8))!]))) / 255.0
+            a?.pointee = CGFloat(s.subString(start: 6, end: 8).hexToInt()) / 255.0
         } else {
-            a = 1
+            a?.pointee = 1
         }
     }
+    
     return true
 }
 
 extension UIColor {
     
-    @objc public class func colorWithHexString(hexString hexStr: String?) -> UIColor {
-        var r: CGFloat = 0
-        var g: CGFloat = 0
-        var b: CGFloat = 0
-        var a: CGFloat = 0
-        if hexStrToRGBA(str: hexStr, r: &r, g: &g, b: &b, a: &a) {
+    /// Hex String convert to UIColor
+    ///
+    /// - Parameter hexString: Hex String
+    @objc(colorWithHexString:)
+    public class func colorWith(hexString: String?) -> UIColor {
+        
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        
+        if hexStrToRGBA(str: hexString, r: &r, g: &g, b: &b, a: &a) {
             return UIColor(red: r, green: g, blue: b, alpha: a)
         }
         return UIColor.black
@@ -286,11 +267,17 @@ extension UIColor {
         return UIColor(red: CGFloat(pixel[0]) / 255.0, green: CGFloat(pixel[1]) / 255.0, blue: CGFloat(pixel[2]) / 255.0, alpha: CGFloat(pixel[3]) / 255.0)
     }
     
+    /// Hex Value convert to UIColor
+    ///
+    /// - Parameter hex: Hex Value
     @objc(colorWithHex:)
     public class func color(with hex: Int) -> UIColor {
         return UIColor(red: CGFloat((Float((hex & 0xff0000) >> 16)) / 255.0), green: CGFloat((Float((hex & 0xff00) >> 8)) / 255.0), blue: CGFloat((Float(hex & 0xff)) / 255.0), alpha: 1.0)
     }
     
+    /// Hex Value convert to UIColor
+    ///
+    /// - Parameter hex: Hex Value
     public convenience init(hex: Int) {
         self.init(red: CGFloat((Float((hex & 0xff0000) >> 16)) / 255.0), green: CGFloat((Float((hex & 0xff00) >> 8)) / 255.0), blue: CGFloat((Float(hex & 0xff)) / 255.0), alpha: 1.0)
     }

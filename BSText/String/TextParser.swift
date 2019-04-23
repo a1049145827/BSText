@@ -199,7 +199,7 @@ public class TextSimpleMarkdownParser: NSObject, TextParser {
                 return i
             }
         }
-        return s.count
+        return s.length
     }
     
     private func lenghOfEndWhite(in str: String?, with range: NSRange) -> Int {
@@ -214,11 +214,11 @@ public class TextSimpleMarkdownParser: NSObject, TextParser {
             }
             i -= 1
         }
-        return s.count
+        return s.length
     }
     
     private func lenghOfBeginChar(_ c: Character, in str: String?, with range: NSRange) -> Int {
-        guard let s = str, s.count > 0 else {
+        guard let s = str, s != "" else {
             return 0
         }
         for i in 0..<range.length {
@@ -226,7 +226,7 @@ public class TextSimpleMarkdownParser: NSObject, TextParser {
                 return i
             }
         }
-        return s.count
+        return s.length
     }
     
     @objc public func parseText(_ text: NSMutableAttributedString?, selectedRange range: NSRangePointer?) -> Bool {
@@ -240,9 +240,9 @@ public class TextSimpleMarkdownParser: NSObject, TextParser {
         t.bs_color = textColor
         let str = t.string
         
-        regexEscape.replaceMatches(in: str as! NSMutableString, options: [], range: NSRange(location: 0, length: str.count), withTemplate: "@@")
+        regexEscape.replaceMatches(in: str as! NSMutableString, options: [], range: NSRange(location: 0, length: str.length), withTemplate: "@@")
         
-        regexHeader.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexHeader.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r: NSRange = result!.range
             let whiteLen = self.lenghOfBeginWhite(in: str, with: r)
             var sharpLen = self.lenghOfBeginChar("#"["#".startIndex], in: str, with: NSRange(location: r.location + whiteLen, length: r.length - whiteLen))
@@ -254,7 +254,7 @@ public class TextSimpleMarkdownParser: NSObject, TextParser {
             text?.bs_set(font: self.headerFonts[sharpLen - 1], range: r)
         })
         
-        regexH1.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexH1.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r = result!.range
             var linebreak: NSRange? = nil
             if let tmpRange = str.range(of: "\n", options: [], range: Range(r, in: str)!, locale: nil) {
@@ -268,7 +268,7 @@ public class TextSimpleMarkdownParser: NSObject, TextParser {
             }
         })
         
-        regexH2.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexH2.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r = result!.range
             var linebreak: NSRange? = nil
             if let tmpRange = str.range(of: "\n", options: [], range: Range(r, in: str)!, locale: nil) {
@@ -282,46 +282,46 @@ public class TextSimpleMarkdownParser: NSObject, TextParser {
             }
         })
         
-        regexBreakline.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexBreakline.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             text?.bs_set(color: self.controlTextColor, range: (result?.range)!)
         })
         
-        regexEmphasis.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexEmphasis.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r = result!.range
             text?.bs_set(color: self.controlTextColor, range: NSRange(location: r.location, length: 1))
             text?.bs_set(color: self.controlTextColor, range: NSRange(location: (r.location + r.length) - 1, length: 1))
             text?.bs_set(font: self.italicFont, range: NSRange(location: r.location + 1, length: r.length - 2))
         })
         
-        regexStrong.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexStrong.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r = result!.range
             text?.bs_set(color: self.controlTextColor, range: NSRange(location: r.location, length: 2))
             text?.bs_set(color: self.controlTextColor, range: NSRange(location: (r.location + r.length) - 2, length: 2))
             text?.bs_set(font: self.boldFont, range: NSRange(location: r.location + 2, length: r.length - 4))
         })
         
-        regexStrongEmphasis.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexStrongEmphasis.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r = result!.range
             text?.bs_set(color: self.controlTextColor, range: NSRange(location: r.location, length: 3))
             text?.bs_set(color: self.controlTextColor, range: NSRange(location: (r.location + r.length) - 3, length: 3))
             text?.bs_set(font: self.boldItalicFont, range: NSRange(location: r.location + 3, length: r.length - 6))
         })
 
-        regexUnderline.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexUnderline.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r = result!.range
             text?.bs_set(color: self.controlTextColor, range: NSRange(location: r.location, length: 2))
             text?.bs_set(color: self.controlTextColor, range: NSRange(location: (r.location + r.length) - 2, length: 2))
             text?.bs_set(textUnderline: TextDecoration.decoration(with: TextLineStyle.single, width: 1, color: nil), range: NSRange(location: r.location + 2, length: r.length - 4))
         })
         
-        regexStrikethrough.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexStrikethrough.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r = result!.range
             text?.bs_set(color: self.controlTextColor, range: NSRange(location: r.location, length: 2))
             text?.bs_set(color: self.controlTextColor, range: NSRange(location: (r.location + r.length) - 2, length: 2))
             text?.bs_set(textStrikethrough: TextDecoration.decoration(with: TextLineStyle.single, width: 1, color: nil), range: NSRange(location: r.location + 2, length: r.length - 4))
         })
         
-        regexInlineCode.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexInlineCode.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r = result!.range
             let len: Int = self.lenghOfBeginChar("`", in: str, with: r)
             
@@ -332,27 +332,27 @@ public class TextSimpleMarkdownParser: NSObject, TextParser {
             text?.bs_set(textBorder: (self.border.copy() as? TextBorder), range: r)
         })
 
-        regexLink.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexLink.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r = result!.range
             text?.bs_set(color: self.linkTextColor, range: r)
         })
         
-        regexLinkRefer.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexLinkRefer.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r = result!.range
             text?.bs_set(color: self.controlTextColor, range: r)
         })
         
-        regexList.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexList.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r = result!.range
             text?.bs_set(color: self.controlTextColor, range: r)
         })
 
-        regexBlockQuote.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexBlockQuote.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r = result!.range
             text?.bs_set(color: self.controlTextColor, range: r)
         })
         
-        regexCodeBlock.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regexCodeBlock.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r = result!.range
             let firstLineRange = self.regexNotEmptyLine.rangeOfFirstMatch(in: str, options: [], range: r)
             

@@ -2573,14 +2573,14 @@ extension NSMutableAttributedString {
      */
     @objc public func bs_setClearColorToJoinedEmoji() {
         let str = string
-        if str.count < 8 {
+        if str.length < 8 {
             return
         }
         // Most string do not contains the joined-emoji, test the joiner first.
         var containsJoiner = false
         let nsStr = str as NSString
         
-        for i in 0..<str.count {
+        for i in 0..<nsStr.length {
             let char: UniChar = nsStr.character(at: i)
             if char == 0x200d {
                 // 'ZERO WIDTH JOINER' (U+200D)
@@ -2599,7 +2599,7 @@ extension NSMutableAttributedString {
         let regex = NSMutableAttributedString.clearColorToJoinedEmojiRegex
         
         let clear = UIColor.clear
-        regex?.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.count), using: { result, flags, stop in
+        regex?.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             self.bs_set(color: clear, range: (result?.range)!)
         })
     }

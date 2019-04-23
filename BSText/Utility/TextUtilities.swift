@@ -376,8 +376,8 @@ public class TextUtilities: NSObject {
     private static func matrix_invert(_ matrix: inout [Double]) -> Int {
         
         // 这样写矩阵中总元素个数大于 8 的时候会发生越界导致 Crash
-        //    var pivot : __CLPK_integer = 0
-        //    var workspace = 0
+//        var pivot : __CLPK_integer = 0
+//        var workspace = 0
         // 这样写个数不受限制
         let pivot = UnsafeMutablePointer<__CLPK_integer>.allocate(capacity: matrix.count)
         let workspace = UnsafeMutablePointer<Double>.allocate(capacity: matrix.count)

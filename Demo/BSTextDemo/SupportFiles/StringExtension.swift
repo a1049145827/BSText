@@ -201,8 +201,8 @@ extension String {
             return self
         }
         let ext = URL(fileURLWithPath: self).pathExtension
-        var extRange = NSRange(location: length - ext.count, length: 0)
-        if ext.count > 0 {
+        var extRange = NSRange(location: length - ext.length, length: 0)
+        if ext != "" {
             extRange.location -= 1
         }
         let scaleStr = "@\(NSNumber(value: Float(scale)))x"
@@ -242,10 +242,37 @@ extension String {
         return NSRange(location: 0, length: length)
     }
     
-    func subString(start: Int, end: Int) -> String {
-        let startIndex = utf16.index(utf16.startIndex, offsetBy: start)
-        let endIndex = utf16.index(utf16.startIndex, offsetBy: end)
-        return String(self[startIndex..<endIndex])
+//    func subString(start: Int, end: Int) -> String {
+//        let startIndex = utf16.index(utf16.startIndex, offsetBy: start)
+//        let endIndex = utf16.index(utf16.startIndex, offsetBy: end)
+//        return String(self[startIndex..<endIndex])
+//    }
+    
+    /// Hex String to Int
+    ///
+    /// - Parameter str: Hex String
+    /// - Returns: Int Value
+    public func hexToInt() -> Int {
+        
+        let input = self
+        
+        let str = input.uppercased()
+        var sum = 0
+        for i in str.utf8 {
+            sum = sum * 16 + Int(i) - 48 // 0-9 start form 48
+            if i >= 65 {                 // A-Z start from 65, origin is 10
+                sum -= 7
+            }
+        }
+        return sum
+
+        // 下面这种方案也可以实现功能，不过效率略低，二者性能差异 5%~10%
+//        let scanner = Scanner(string: input)
+//        scanner.scanLocation = 0
+//        var value: UInt32 = 0
+//        scanner.scanHexInt32(&value)
+//
+//        return Int(value)
     }
     
     /// NSRange 转化为 Range

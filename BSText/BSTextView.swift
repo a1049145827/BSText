@@ -410,8 +410,8 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                 return
             }
             _setTextParser(newValue)
-            if textParser != nil && text.count != 0 {
-                replace(TextRange(range: NSRange(location: 0, length: text.count)), withText: text)
+            if textParser != nil && text != "" {
+                replace(TextRange(range: NSRange(location: 0, length: text.length)), withText: text)
             }
             _resetUndoAndRedoStack()
             _commitUpdate()
@@ -456,7 +456,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                 (_placeholderAttributedText as? NSMutableAttributedString)?.bs_font = placeholderFont
                 (_placeholderAttributedText as? NSMutableAttributedString)?.bs_color = placeholderTextColor
             } else {
-                if (newValue?.count ?? 0) > 0 {
+                if (newValue?.length ?? 0) > 0 {
                     let atr = NSMutableAttributedString(string: newValue!)
                     if _placeholderFont == nil {
                         _placeholderFont = _font ?? BSTextView._defaultFont
@@ -2104,7 +2104,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     /// Returns whether the text view can paste data from pastboard.
     func _isPasteboardContainsValidValue() -> Bool {
         let pasteboard = UIPasteboard.general
-        if (pasteboard.string?.count ?? 0) > 0 {
+        if (pasteboard.string?.length ?? 0) > 0 {
             return true
         }
         if (pasteboard.bs_AttributedString?.length ?? 0) > 0 {
@@ -2124,12 +2124,12 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     func _copySelectedTextToPasteboard() {
         if allowsCopyAttributedString {
             let text: NSAttributedString = _innerText.attributedSubstring(from: _selectedTextRange.asRange)
-            if text.length != 0 {
+            if text.length > 0 {
                 UIPasteboard.general.bs_AttributedString = text
             }
         } else {
             let string = _innerText.bs_plainText(for: _selectedTextRange.asRange)
-            if (string?.count ?? 0) != 0 {
+            if (string?.length ?? 0) > 0 {
                 UIPasteboard.general.string = string
             }
         }
@@ -2299,13 +2299,13 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             var newRange = NSRange(location: 0, length: 0)
             // fixbug 修复连续输入 Emoji 时出现的乱码的问题，原因：NSString 中 Emoji 表情的 length 等于2，而 Swift 中 Emoji 的 Count 等于1，_innerText 继承于 NSString，所以此处用 (text as NSString).length
             // now use text.utf16.count replace (text as NSString).length
-            newRange.location = _selectedTextRange.start.offset + text.utf16.count
+            newRange.location = _selectedTextRange.start.offset + text.length
             _selectedTextRange = TextRange(range: newRange)
             if notify {
                 _inputDelegate?.selectionDidChange(self)
             }
         } else {
-            if range.asRange.length != text.count {
+            if range.asRange.length != text.length {
                 if notify {
                     _inputDelegate?.selectionWillChange(self)
                 }
@@ -2313,17 +2313,17 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                 if unionRange.length == 0 {
                     // no intersection
                     if range.end.offset <= _selectedTextRange.start.offset {
-                        let ofs = text.count - range.asRange.length
+                        let ofs = text.length - range.asRange.length
                         var newRange = _selectedTextRange.asRange
                         newRange.location += ofs
                         _selectedTextRange = TextRange(range: newRange)
                     }
                 } else if unionRange.length == _selectedTextRange.asRange.length {
                     // target range contains selected range
-                    _selectedTextRange = TextRange(range: NSRange(location: range.start.offset + text.count, length: 0))
+                    _selectedTextRange = TextRange(range: NSRange(location: range.start.offset + text.length, length: 0))
                 } else if range.start.offset >= _selectedTextRange.start.offset && range.end.offset <= _selectedTextRange.end.offset {
                     // target range inside selected range
-                    let ofs = text.count - range.asRange.length
+                    let ofs = text.length - range.asRange.length
                     var newRange: NSRange = _selectedTextRange.asRange
                     newRange.length += ofs
                     _selectedTextRange = TextRange(range: newRange)
@@ -2331,7 +2331,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                     // interleaving
                     if range.start.offset < _selectedTextRange.start.offset {
                         var newRange: NSRange = _selectedTextRange.asRange
-                        newRange.location = range.start.offset + text.count
+                        newRange.location = range.start.offset + text.length
                         newRange.length -= unionRange.length
                         _selectedTextRange = TextRange(range: newRange)
                     } else {
@@ -2349,7 +2349,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         if notify {
             _inputDelegate?.textWillChange(self)
         }
-        let newRange = NSRange(location: range.asRange.location, length: text.count)
+        let newRange = NSRange(location: range.asRange.location, length: text.length)
         _innerText.replaceCharacters(in: range.asRange, with: text)
         _innerText.bs_removeDiscontinuousAttributes(in: newRange)
         if notify {
@@ -2674,17 +2674,17 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         var strings: [String] = []
         
         var preferred = Bundle.main.preferredLocalizations.first ?? ""
-        if preferred.count == 0 {
+        if preferred == "" {
             preferred = "English"
         }
         var canonical = NSLocale.canonicalLocaleIdentifier(from: preferred)
-        if canonical.count == 0 {
+        if canonical == "" {
             canonical = "en"
         }
         strings = localizedUndoStringsDic[canonical] ?? []
         if strings.count == 0 && ((canonical as NSString).range(of: "_").location != NSNotFound) {
             
-            if let prefix = canonical.components(separatedBy: "_").first, prefix.count > 0 {
+            if let prefix = canonical.components(separatedBy: "_").first, prefix != "" {
                 strings = localizedUndoStringsDic[prefix] ?? []
             }
         }
@@ -3608,7 +3608,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             }
         } else {
             let string = p.string
-            if let s = string, s.count > 0 {
+            if let s = string, s != "" {
                 _saveToUndoStack()
                 _resetRedoStack()
                 replace(_selectedTextRange, withText: s)
@@ -3652,7 +3652,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     func _define(_ sender: Any?) {
         _hideMenu()
         
-        guard let string = _innerText.bs_plainText(for: _selectedTextRange.asRange), string.count > 0 else {
+        guard let string = _innerText.bs_plainText(for: _selectedTextRange.asRange), string != "" else {
             return
         }
         let resign: Bool = resignFirstResponder()
@@ -3813,7 +3813,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     // MARK: - @protocol UIALertViewDelegate
     public func alertView(_ alertView: UIAlertView, clickedButtonAt buttonIndex: Int) {
         let title = alertView.buttonTitle(at: buttonIndex)
-        if (title?.count ?? 0) == 0 {
+        if (title?.length ?? 0) == 0 {
             return
         }
         let strings = _localizedUndoStrings()
@@ -3832,7 +3832,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     public func insertText(_ text: String) {
-        if text.count == 0 {
+        if text == "" {
             return
         }
         if !NSEqualRanges(_lastTypeRange!, _selectedTextRange.asRange) {
@@ -3967,7 +3967,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         _inputDelegate?.selectionWillChange(self)
         
         if markedTextRange == nil {
-            markedTextRange = TextRange(range: NSRange(location: _selectedTextRange.end.offset, length: markedText.count))
+            markedTextRange = TextRange(range: NSRange(location: _selectedTextRange.end.offset, length: markedText.length))
             let subRange = NSRange(location: _selectedTextRange.end.offset, length: 0)
             _innerText.replaceCharacters(in: subRange, with: markedText)
             _selectedTextRange = TextRange(range: NSRange(location: _selectedTextRange.start.offset + selectedRange.location, length: selectedRange.length))
@@ -3975,7 +3975,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             markedTextRange = _correctedTextRange(markedTextRange as? TextRange)!
             let subRange = (markedTextRange as! TextRange).asRange
             _innerText.replaceCharacters(in: subRange, with: markedText)
-            markedTextRange = TextRange(range: NSRange(location: (markedTextRange as! TextRange).start.offset, length: markedText.count))
+            markedTextRange = TextRange(range: NSRange(location: (markedTextRange as! TextRange).start.offset, length: markedText.length))
             _selectedTextRange = TextRange(range: NSRange(location: (markedTextRange as! TextRange).start.offset + selectedRange.location, length: selectedRange.length))
         }
         
@@ -4025,7 +4025,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         var range = range as! TextRange
         let text = text
         
-        if range.asRange.length == 0 && text.count == 0 {
+        if range.asRange.length == 0 && text == "" {
             return
         }
         range = _correctedTextRange(range)!
@@ -4041,7 +4041,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         var useInnerAttributes = false
         if _innerText.length > 0 {
             if range.start.offset == 0 && range.end.offset == _innerText.length {
-                if text.count == 0 {
+                if text == "" {
                     var attrs = _innerText.bs_attributes(at: 0)
                     for k in NSMutableAttributedString.bs_allDiscontinuousAttributeKeys() {
                         attrs?.removeValue(forKey: k)
@@ -4057,7 +4057,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         if state.typingAttributesOnce {
             state.typingAttributesOnce = false
             if !useInnerAttributes {
-                if range.asRange.length == 0 && text.count > 0 {
+                if range.asRange.length == 0 && text != "" {
                     applyTypingAttributes = true
                 }
             }
@@ -4072,7 +4072,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         if useInnerAttributes {
             _innerText.bs_setAttributes(_typingAttributesHolder.bs_attributes)
         } else if applyTypingAttributes {
-            let newRange = NSRange(location: range.asRange.location, length: text.count)
+            let newRange = NSRange(location: range.asRange.location, length: text.length)
             for (key, obj) in _typingAttributesHolder.bs_attributes ?? [:] {
                 self._innerText.bs_set(attribute: key, value: obj, range: newRange)
             }

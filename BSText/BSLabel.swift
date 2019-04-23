@@ -55,7 +55,7 @@ open class BSLabel: UIView, TextDebugTarget, TextAsyncLayerDelegate, NSSecureCod
                 return
             }
             _text = newValue
-            let needAddAttributes = (innerText.length == 0 && (text?.count ?? 0) > 0)
+            let needAddAttributes = (innerText.length == 0 && (text?.length ?? 0) > 0)
             innerText.replaceCharacters(in: NSRange(location: 0, length: innerText.length), with: text != nil ? text! : "")
             innerText.bs_removeDiscontinuousAttributes(in: NSRange(location: 0, length: innerText.length))
             if needAddAttributes {

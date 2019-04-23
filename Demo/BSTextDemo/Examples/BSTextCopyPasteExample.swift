@@ -42,7 +42,7 @@ class BSTextCopyPasteExample: UIViewController, TextViewDelegate {
         textView.scrollIndicatorInsets = textView.contentInset
         view.addSubview(textView)
         
-        textView.selectedRange = NSRange(location: text.count, length: 0)
+        textView.selectedRange = NSRange(location: text.length, length: 0)
         textView.becomeFirstResponder()
     }
     

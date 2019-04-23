@@ -22,7 +22,7 @@ extension Bundle {
     }()
     
     class func path(forScaledResource name: String?, ofType ext: String?, inDirectory bundlePath: String?) -> String? {
-        guard let name = name, name.count > 0 else {
+        guard let name = name, name != "" else {
             return nil
         }
         let bundlePath = bundlePath ?? ""
@@ -45,7 +45,7 @@ extension Bundle {
     }
     
     func path(forScaledResource name: String?, ofType ext: String?) -> String? {
-        guard let name = name, name.count > 0 else {
+        guard let name = name, name != "" else {
             return nil
         }
         if name.hasSuffix("/") {
@@ -67,7 +67,7 @@ extension Bundle {
     }
     
     func path(forScaledResource name: String?, ofType ext: String?, inDirectory subpath: String?) -> String? {
-        guard let name = name, name.count > 0 else {
+        guard let name = name, name != "" else {
             return nil
         }
         if name.hasSuffix("/") {

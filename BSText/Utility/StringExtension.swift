@@ -29,7 +29,7 @@ extension String {
     
     /// compatibility API for NSString
     public var length: Int {
-        return self.count
+        return self.utf16.count
     }
     
     public func indexOf(_ target: Character) -> Int? {
