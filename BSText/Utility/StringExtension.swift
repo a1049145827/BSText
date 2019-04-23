@@ -10,14 +10,17 @@ import Foundation
 
 extension String {
     
+    /// compatibility API -intValue for NSString
     public var toInt: Int? {
         return Int(self)
     }
     
+    /// compatibility API -floatValue for NSString
     public var toFloat: Float? {
         return Float(self)
     }
     
+    /// compatibility API -doubleValue for NSString
     public var toDouble: Double? {
         return Double(self)
     }
@@ -27,6 +30,7 @@ extension String {
         return self.trimmingCharacters(in: CharacterSet.whitespaces)
     }
     
+    // String's count is equal to String's character.count
     /// compatibility API for NSString
     public var length: Int {
         return self.utf16.count
