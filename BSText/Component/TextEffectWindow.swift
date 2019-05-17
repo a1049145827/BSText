@@ -36,8 +36,10 @@ import UIKit
         
         if !TextUtilities.isAppExtension {
             let one = self.init()
-            one.frame = CGRect()
-            one.frame.size = TextUtilities.textScreenSize
+            one.rootViewController = UIViewController()
+            var rect = CGRect.zero
+            rect.size = TextUtilities.textScreenSize
+            one.frame = rect
             one.isUserInteractionEnabled = false
             one.windowLevel = UIWindow.Level(UIWindow.Level.statusBar.rawValue + 1)
             one.isHidden = false
@@ -193,17 +195,13 @@ import UIKit
                 if window.isHidden {
                     continue
                 }
-                let topViewController = window.rootViewController
-                if topViewController != nil {
+                
+                if let topViewController = window.rootViewController {
                     return topViewController
                 }
             }
-            var viewController = super.rootViewController
-            if viewController == nil {
-                viewController = UIViewController()
-                super.rootViewController = viewController
-            }
-            return viewController
+            
+            return super.rootViewController
         }
     }
     
