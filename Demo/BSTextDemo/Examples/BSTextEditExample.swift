@@ -187,17 +187,19 @@ class BSTextEditExample: UIViewController, TextViewDelegate, TextKeyboardObserve
         }
     }
     
-    // MARK: - text view
-    private func textViewDidBeginEditing(_ textView: UITextView) {
+    // MARK: - BSTextViewDelegate
+    
+    func textViewDidBeginEditing(_ textView: BSTextView) {
         let buttonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.edit(_:)))
         navigationItem.rightBarButtonItem = buttonItem
     }
     
-    private func textViewDidEndEditing(_ textView: UITextView) {
+    func textViewDidEndEditing(_ textView: BSTextView) {
         navigationItem.rightBarButtonItem = nil
     }
     
     // MARK: - keyboard
+    
     func keyboardChanged(with transition: TextKeyboardTransition) {
         var clipped = false
         if textView.isVerticalForm && transition.toVisible {

@@ -349,12 +349,9 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                 replace(TextRange(range: NSRange(location: 0, length: _innerText.length)), withText: "")
                 return
             }
-            if let d = delegate as? TextViewDelegate {
-                if d.responds(to: #selector(d.textView(_:shouldChangeTextIn:replacementText:))) {
-                    let should: Bool = d.textView!(self, shouldChangeTextIn: NSRange(location: 0, length: _innerText.length), replacementText: text?.string ?? "")
-                    if !should {
-                        return
-                    }
+            if let should = _outerDelegate?.textView?(self, shouldChangeTextIn: NSRange(location: 0, length: _innerText.length), replacementText: text?.string ?? "") {
+                if !should {
+                    return
                 }
             }
             
@@ -383,11 +380,9 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             if isFirstResponder {
                 _scrollRangeToVisible(_selectedTextRange)
             }
-            if let d = delegate as? TextViewDelegate {
-                if d.responds(to: #selector(d.textViewDidChange(_:))) {
-                    d.textViewDidChange!(self)
-                }
-            }
+            
+            _outerDelegate?.textViewDidChange?(self)
+            
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: BSTextView.textViewTextDidChangeNotification), object: self)
             
             if !state.insideUndoBlock {
@@ -1628,16 +1623,15 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                 _endTouchTracking()
             } else {
                 var shouldHighlight = true
-                if let d = delegate as? TextViewDelegate {
-                    
-                    if d.responds(to: #selector(d.textView(_:shouldLongPress:in:))) {
-                        shouldHighlight = d.textView!(self, shouldLongPress: _highlight!, in: _highlightRange)
+                if let d = _outerDelegate {
+                    if let s = d.textView?(self, shouldLongPress: _highlight!, in: _highlightRange) {
+                        shouldHighlight = s
                     }
-                    if shouldHighlight && d.responds(to: #selector(d.textView(_:didLongPress:in:rect:))) {
+                    if shouldHighlight {
                         dealLongPressAction = true
                         var rect: CGRect = _innerLayout!.rect(for: TextRange(range: _highlightRange))
                         rect = _convertRect(fromLayout: rect)
-                        d.textView!(self, didLongPress: _highlight!, in: _highlightRange, rect: rect)
+                        d.textView?(self, didLongPress: _highlight!, in: _highlightRange, rect: rect)
                         _endTouchTracking()
                     }
                 }
@@ -1972,12 +1966,12 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         var shouldTap = true
         var shouldLongPress = true
         if highlight.tapAction == nil && highlight.longPressAction == nil {
-            if let d = delegate as? TextViewDelegate {
-                if d.responds(to: #selector(d.textView(_:shouldTap:in:))) {
-                    shouldTap = d.textView!(self, shouldTap: highlight, in: highlightRange.pointee)
+            if let d = _outerDelegate {
+                if let t = d.textView?(self, shouldTap: highlight, in: highlightRange.pointee) {
+                    shouldTap = t
                 }
-                if d.responds(to: #selector(d.textView(_:shouldLongPress:in:))) {
-                    shouldLongPress = d.textView!(self, shouldLongPress: highlight, in: highlightRange.pointee)
+                if let l = d.textView?(self, shouldLongPress: highlight, in: highlightRange.pointee) {
+                    shouldLongPress = l
                 }
             }
         }
@@ -2848,9 +2842,8 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         willChangeValue(forKey: "selectedRange")
         _selectedRange = selectedRange
         didChangeValue(forKey: "selectedRange")
-        if let d = delegate as? TextViewDelegate, d.responds(to: #selector(d.textViewDidChangeSelection(_:))) {
-            d.textViewDidChangeSelection!(self)
-        }
+        
+        _outerDelegate?.textViewDidChangeSelection?(self)
     }
     
     private func _setTypingAttributes(_ typingAttributes: [NSAttributedString.Key : Any]?) {
@@ -3213,6 +3206,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                 _showMagnifierRanged()
             }
         }
+        
         let autoScrollOffset: CGFloat = _getAutoscrollOffset()
         if autoScrollOffset != _autoScrollOffset {
             if abs(Float(autoScrollOffset)) < abs(Float(_autoScrollOffset)) {
@@ -3254,13 +3248,13 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                         _highlight!.tapAction!(self, _innerText, _highlightRange, rect)
                     } else {
                         var shouldTap = true
-                        if let d = delegate as? TextViewDelegate, d.responds(to: #selector(d.textView(_:shouldTap:in:))) {
-                            shouldTap = d.textView!(self, shouldTap: _highlight!, in: _highlightRange)
+                        if let t = _outerDelegate?.textView?(self, shouldTap: _highlight!, in: _highlightRange) {
+                            shouldTap = t
                         }
-                        if shouldTap, let d = delegate as? TextViewDelegate, d.responds(to: #selector(d.textView(_:didTap:in:rect:))) {
-                            var rect: CGRect = _innerLayout!.rect(for: TextRange(range: _highlightRange))
+                        if shouldTap {
+                            var rect = _innerLayout!.rect(for: TextRange(range: _highlightRange))
                             rect = _convertRect(fromLayout: rect)
-                            d.textView!(self, didTap: _highlight!, in: _highlightRange, rect: rect)
+                            _outerDelegate?.textView?(self, didTap: _highlight!, in: _highlightRange, rect: rect)
                         }
                     }
                     _removeHighlight(animated: true)
@@ -3375,8 +3369,8 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         if state.ignoreFirstResponder {
             return false
         }
-        if let d = delegate as? TextViewDelegate, d.responds(to: #selector(d.textViewShouldBeginEditing(_:))) {
-            if !d.textViewShouldBeginEditing!(self) {
+        if let should = _outerDelegate?.textViewShouldBeginEditing?(self) {
+            if !should {
                 return false
             }
         }
@@ -3402,9 +3396,9 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             _updateIfNeeded()
             _updateSelectionView()
             perform(#selector(self._scrollSelectedRangeToVisible), with: nil, afterDelay: 0)
-            if let d = delegate as? TextViewDelegate, d.responds(to: #selector(d.textViewDidBeginEditing(_:))) {
-                d.textViewDidBeginEditing!(self)
-            }
+            
+            _outerDelegate?.textViewDidBeginEditing?(self)
+                
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: BSTextView.textViewTextDidBeginEditingNotification), object: self)
         }
         return become
@@ -3414,10 +3408,8 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         if !isFirstResponder {
             return true
         }
-        if let d = delegate as? TextViewDelegate, d.responds(to: #selector(d.textViewShouldEndEditing(_:))) {
-            if !d.textViewShouldEndEditing!(self) {
-                return false
-            }
+        if let should = _outerDelegate?.textViewShouldEndEditing?(self) {
+            return !should
         }
         return true
     }
@@ -3444,9 +3436,9 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             _updateIfNeeded()
             _updateSelectionView()
             _restoreInsets(animated: true)
-            if let d = delegate as? TextViewDelegate, d.responds(to: #selector(d.textViewDidEndEditing(_:))) {
-                d.textViewDidEndEditing!(self)
-            }
+            
+            _outerDelegate?.textViewDidEndEditing?(self)
+            
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: BSTextView.textViewTextDidEndEditingNotification), object: self)
         }
         return resign
@@ -3723,27 +3715,22 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         TextEffectWindow.shared?.hide(selectionDot: _selectionView)
         
-        if _outerDelegate?.responds(to: #function) ?? false {
-            _outerDelegate?.scrollViewDidScroll!(scrollView)
-        }
+        _outerDelegate?.scrollViewDidScroll?(scrollView)
     }
     
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
-        if _outerDelegate?.responds(to: #function) ?? false {
-            _outerDelegate?.scrollViewDidZoom!(scrollView)
-        }
+        
+        _outerDelegate?.scrollViewDidZoom?(scrollView)
     }
     
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        if _outerDelegate?.responds(to: #function) ?? false {
-            _outerDelegate?.scrollViewWillBeginDragging!(scrollView)
-        }
+        
+        _outerDelegate?.scrollViewWillBeginDragging?(scrollView)
     }
     
     public func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-        if _outerDelegate?.responds(to: #function) ?? false {
-            _outerDelegate?.scrollViewWillEndDragging!(scrollView, withVelocity: velocity, targetContentOffset: targetContentOffset)
-        }
+        
+        _outerDelegate?.scrollViewWillEndDragging?(scrollView, withVelocity: velocity, targetContentOffset: targetContentOffset)
     }
     
     public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
@@ -3751,60 +3738,48 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             TextEffectWindow.shared?.show(selectionDot: _selectionView)
         }
         
-        if _outerDelegate?.responds(to: #function) ?? false {
-            _outerDelegate?.scrollViewDidEndDragging!(scrollView, willDecelerate: decelerate)
-        }
+        _outerDelegate?.scrollViewDidEndDragging?(scrollView, willDecelerate: decelerate)
     }
-
     
     public func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
-        if _outerDelegate?.responds(to: #function) ?? false {
-            _outerDelegate?.scrollViewWillBeginDecelerating!(scrollView)
-        }
+        
+        _outerDelegate?.scrollViewWillBeginDecelerating?(scrollView)
     }
     
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         TextEffectWindow.shared?.show(selectionDot: _selectionView)
         
-        if _outerDelegate?.responds(to: #function) ?? false {
-            _outerDelegate?.scrollViewDidEndDecelerating!(scrollView)
-        }
+        _outerDelegate?.scrollViewDidEndDecelerating?(scrollView)
     }
     
     public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        if _outerDelegate?.responds(to: #function) ?? false {
-            _outerDelegate?.scrollViewDidEndScrollingAnimation!(scrollView)
-        }
+        
+        _outerDelegate?.scrollViewDidEndScrollingAnimation?(scrollView)
     }
     
     public func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        if _outerDelegate?.responds(to: #function) ?? false {
-            return _outerDelegate?.viewForZooming!(in: scrollView)
-        } else {
-            return nil
-        }
+        
+        return _outerDelegate?.viewForZooming?(in: scrollView)
     }
     
     public func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
-        if _outerDelegate?.responds(to: #function) ?? false {
-            _outerDelegate?.scrollViewWillBeginZooming!(scrollView, with: view)
-        }
+        
+        _outerDelegate?.scrollViewWillBeginZooming?(scrollView, with: view)
     }
     
     public func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
-        if _outerDelegate?.responds(to: #function) ?? false {
-            _outerDelegate?.scrollViewDidEndZooming!(scrollView, with: view, atScale: scale)
-        }
+        
+        _outerDelegate?.scrollViewDidEndZooming?(scrollView, with: view, atScale: scale)
     }
     
     public func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
         
-        return _outerDelegate?.scrollViewShouldScrollToTop!(scrollView) ?? true
+        return _outerDelegate?.scrollViewShouldScrollToTop?(scrollView) ?? true
     }
     
     public func scrollViewDidScrollToTop(_ scrollView: UIScrollView) {
         
-        _outerDelegate?.scrollViewDidScrollToTop!(scrollView)
+        _outerDelegate?.scrollViewDidScrollToTop?(scrollView)
     }
     
     // MARK: - @protocol TextKeyboardObserver
@@ -3941,11 +3916,11 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         _endTouchTracking()
         _hideMenu()
         
-        if let d = delegate as? TextViewDelegate, d.responds(to: #selector(d.textView(_:shouldChangeTextIn:replacementText:))) {
+        if let d = _outerDelegate {
             let r = markedTextRange as? TextRange
             let range = (r != nil) ? r!.asRange : NSRange(location: _selectedTextRange.end.offset, length: 0)
-            let should: Bool = d.textView!(self, shouldChangeTextIn: range, replacementText: markedText)
-            if !should {
+            
+            if let should = d.textView?(self, shouldChangeTextIn: range, replacementText: markedText), should == false {
                 return
             }
         }
@@ -4001,9 +3976,8 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         _updateSelectionView()
         _scrollRangeToVisible(_selectedTextRange)
         
-        if let d = delegate as? TextViewDelegate, d.responds(to: #selector(d.textViewDidChange(_:))) {
-            d.textViewDidChange!(self)
-        }
+        _outerDelegate?.textViewDidChange?(self)
+        
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: BSTextView.textViewTextDidChangeNotification), object: self)
         
         _lastTypeRange = _selectedTextRange.asRange
@@ -4033,10 +4007,8 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         }
         range = _correctedTextRange(range)!
         
-        if let d = delegate as? TextViewDelegate, d.responds(to: #selector(d.textView(_:shouldChangeTextIn:replacementText:))) {
-            var should: Bool = false
-            should = d.textView!(self, shouldChangeTextIn: range.asRange, replacementText: text)
-            if !should {
+        if let d = _outerDelegate {
+            if let should = d.textView?(self, shouldChangeTextIn: range.asRange, replacementText: text), should == false {
                 return
             }
         }
@@ -4088,9 +4060,8 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             _scrollRangeToVisible(_selectedTextRange)
         }
         
-        if let d = delegate as? TextViewDelegate, d.responds(to: #selector(d.textViewDidChange(_:))) {
-            d.textViewDidChange!(self)
-        }
+        _outerDelegate?.textViewDidChange?(self)
+        
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: BSTextView.textViewTextDidChangeNotification), object: self)
         
         _lastTypeRange = _selectedTextRange.asRange

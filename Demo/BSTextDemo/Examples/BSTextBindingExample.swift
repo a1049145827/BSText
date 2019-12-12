@@ -52,20 +52,20 @@ class BSTextBindingExample: UIViewController, TextViewDelegate {
         }
     }
     
-    // MARK: - TextViewDelegate
+    // MARK: - BSTextViewDelegate
     
-    private func textViewDidChange(_ textView: UITextView) {
+    func textViewDidChange(_ textView: BSTextView) {
         if textView.text.length == 0 {
             textView.textColor = UIColor.black
         }
     }
     
-    private func textViewDidBeginEditing(_ textView: UITextView) {
+    func textViewDidBeginEditing(_ textView: BSTextView) {
         let buttonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.edit(_:)))
         navigationItem.rightBarButtonItem = buttonItem
     }
     
-    private func textViewDidEndEditing(_ textView: UITextView) {
+    func textViewDidEndEditing(_ textView: BSTextView) {
         navigationItem.rightBarButtonItem = nil
     }
 }

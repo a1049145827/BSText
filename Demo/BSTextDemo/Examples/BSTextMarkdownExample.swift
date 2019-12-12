@@ -12,6 +12,7 @@ import BSText
 class BSTextMarkdownExample: UIViewController, TextViewDelegate {
     
     private var textView = BSTextView()
+    private var textViewInsets = UIEdgeInsets.zero
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,7 +38,8 @@ class BSTextMarkdownExample: UIViewController, TextViewDelegate {
         textView.keyboardDismissMode = UIScrollView.KeyboardDismissMode.interactive
         
         textView.backgroundColor = UIColor(white: 0.134, alpha: 1.000)
-        textView.contentInset = UIEdgeInsets(top: kNavHeight, left: 0, bottom: 0, right: 0)
+        textViewInsets = UIEdgeInsets(top: kNavHeight, left: 0, bottom: 0, right: 0)
+        textView.contentInset = textViewInsets
         textView.scrollIndicatorInsets = textView.contentInset
         textView.selectedRange = NSRange(location: text.length, length: 0)
         view.addSubview(textView)
@@ -51,14 +53,18 @@ class BSTextMarkdownExample: UIViewController, TextViewDelegate {
         }
     }
     
-    // MARK: - TextViewDelegate
+    // MARK: - BSTextViewDelegate
     
-    private func textViewDidBeginEditing(_ textView: UITextView) {
+    func textViewDidBeginEditing(_ textView: BSTextView) {
         let buttonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.edit(_:)))
         navigationItem.rightBarButtonItem = buttonItem
+
+        textView.contentInset = textViewInsets
     }
     
-    private func textViewDidEndEditing(_ textView: UITextView) {
+    func textViewDidEndEditing(_ textView: BSTextView) {
         navigationItem.rightBarButtonItem = nil
+
+        textView.contentInset = textViewInsets
     }
 }

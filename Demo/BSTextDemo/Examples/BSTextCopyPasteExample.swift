@@ -13,6 +13,7 @@ import YYImage
 class BSTextCopyPasteExample: UIViewController, TextViewDelegate {
     
     private var textView = BSTextView()
+    private var textViewInsets = UIEdgeInsets.zero
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,7 +39,8 @@ class BSTextCopyPasteExample: UIViewController, TextViewDelegate {
         textView.allowsPasteAttributedString = true /// Paste attributed string
         textView.keyboardDismissMode = UIScrollView.KeyboardDismissMode.interactive
         
-        textView.contentInset = UIEdgeInsets(top: kNavHeight, left: 0, bottom: 0, right: 0)
+        textViewInsets = UIEdgeInsets(top: kNavHeight, left: 0, bottom: 0, right: 0)
+        textView.contentInset = textViewInsets
         textView.scrollIndicatorInsets = textView.contentInset
         view.addSubview(textView)
         
@@ -56,12 +58,16 @@ class BSTextCopyPasteExample: UIViewController, TextViewDelegate {
     
     // MARK: - TextViewDelegate
     
-    private func textViewDidBeginEditing(_ textView: UITextView) {
+    func textViewDidBeginEditing(_ textView: BSTextView) {
         let buttonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.edit(_:)))
         navigationItem.rightBarButtonItem = buttonItem
+
+        textView.contentInset = textViewInsets
     }
     
-    private func textViewDidEndEditing(_ textView: UITextView) {
+    func textViewDidEndEditing(_ textView: BSTextView) {
         navigationItem.rightBarButtonItem = nil
+        
+        textView.contentInset = textViewInsets
     }
 }

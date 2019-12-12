@@ -108,14 +108,14 @@ class BSTextTagExample: UIViewController, TextViewDelegate {
         }
     }
     
-    // MARK: text view
+    // MARK: BSTextViewDelegate
     
-    private func textViewDidBeginEditing(_ textView: UITextView) {
+    func textViewDidBeginEditing(_ textView: BSTextView) {
         let buttonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.edit(_:)))
         navigationItem.rightBarButtonItem = buttonItem
     }
     
-    private func textViewDidEndEditing(_ textView: UITextView) {
+    func textViewDidEndEditing(_ textView: BSTextView) {
         navigationItem.rightBarButtonItem = nil
     }
 }
