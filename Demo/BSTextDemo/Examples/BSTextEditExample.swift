@@ -17,6 +17,7 @@ class BSTextEditExample: UIViewController, TextViewDelegate, TextKeyboardObserve
     private var verticalSwitch = UISwitch()
     private var debugSwitch = UISwitch()
     private var exclusionSwitch = UISwitch()
+    private var textViewInsets = UIEdgeInsets.zero
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,7 +48,8 @@ class BSTextEditExample: UIViewController, TextViewDelegate, TextKeyboardObserve
         textView.delegate = self
         textView.keyboardDismissMode = UIScrollView.KeyboardDismissMode.interactive
         
-        textView.contentInset = UIEdgeInsets(top: toolbar.bottom, left: 0, bottom: 0, right: 0)
+        textViewInsets = UIEdgeInsets(top: toolbar.bottom, left: 0, bottom: 0, right: 0)
+        textView.contentInset = textViewInsets
         textView.scrollIndicatorInsets = textView.contentInset
         textView.selectedRange = NSRange(location: text.length, length: 0)
         view.insertSubview(textView, belowSubview: toolbar)
@@ -152,7 +154,7 @@ class BSTextEditExample: UIViewController, TextViewDelegate, TextKeyboardObserve
         }
     }
     
-    func initImageView() {
+    private func initImageView() {
         let data = Data.dataNamed("dribbble256_imageio.png")
         let image = YYImage(data: data!, scale: 2)
         imageView = YYAnimatedImageView(image: image)
@@ -211,5 +213,6 @@ class BSTextEditExample: UIViewController, TextViewDelegate, TextKeyboardObserve
         if !clipped {
             textView.frame = view.bounds
         }
+        textView.contentInset = textViewInsets
     }
 }
