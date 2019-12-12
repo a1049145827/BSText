@@ -24,7 +24,7 @@ class BSTextTagExample: UIViewController, TextViewDelegate {
         }
         
         let text = NSMutableAttributedString()
-        var tags = [
+        let tags = [
             "◉red",
             "◉orange",
             "◉yellow",
@@ -33,7 +33,7 @@ class BSTextTagExample: UIViewController, TextViewDelegate {
             "◉purple",
             "◉gray"
         ]
-        var tagStrokeColors: [UIColor] = [
+        let tagStrokeColors: [UIColor] = [
             UIColor(hex: 0xfa3f39),
             UIColor(hex: 0xf48f25),
             UIColor(hex: 0xf1c02c),
@@ -42,7 +42,7 @@ class BSTextTagExample: UIViewController, TextViewDelegate {
             UIColor(hex: 0xc171d8),
             UIColor(hex: 0x818e91)
         ]
-        var tagFillColors: [UIColor] = [
+        let tagFillColors: [UIColor] = [
             UIColor(hex: 0xfb6560),
             UIColor(hex: 0xf6a550),
             UIColor(hex: 0xf3cc56),
