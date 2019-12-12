@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -43,8 +43,6 @@
 		322E396521F81687004AC265 /* BSFPSLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322E394A21F81687004AC265 /* BSFPSLabel.swift */; };
 		AA6BBB3D6FE4996C5D548A02 /* Pods_BSTextDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5054A7D00FBF84BDFD3017C2 /* Pods_BSTextDemoTests.framework */; };
 		C70D65BAF91CCA8F4C3E7B0D /* Pods_BSTextDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B8BD8EF203494111144A38E /* Pods_BSTextDemo.framework */; };
-		C90AE6EBBAD352AE209F0A99 /* Pods_BSTextDemo_BSTextDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CAF7AD010B279A97139DCF15 /* Pods_BSTextDemo_BSTextDemoTests.framework */; };
-		EF889028B0FB03ED4C0A6DD9 /* Pods_BSTextDemo_BSTextDemoUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 66A27993C59CAFAB758644DC /* Pods_BSTextDemo_BSTextDemoUITests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,13 +106,11 @@
 		3FDC73D36B8A6F54C9231CD1 /* Pods-BSTextDemo-BSTextDemoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BSTextDemo-BSTextDemoTests.debug.xcconfig"; path = "Target Support Files/Pods-BSTextDemo-BSTextDemoTests/Pods-BSTextDemo-BSTextDemoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		4B8BD8EF203494111144A38E /* Pods_BSTextDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BSTextDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5054A7D00FBF84BDFD3017C2 /* Pods_BSTextDemoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BSTextDemoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		66A27993C59CAFAB758644DC /* Pods_BSTextDemo_BSTextDemoUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BSTextDemo_BSTextDemoUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6BD437B31193762BD05A6622 /* Pods_BSTextDemoUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BSTextDemoUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F866DA1F2FD70DF9C8F6683 /* Pods-BSTextDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BSTextDemo.release.xcconfig"; path = "Target Support Files/Pods-BSTextDemo/Pods-BSTextDemo.release.xcconfig"; sourceTree = "<group>"; };
 		94177DC67F2AE6992D359D40 /* Pods-BSTextDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BSTextDemo.debug.xcconfig"; path = "Target Support Files/Pods-BSTextDemo/Pods-BSTextDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		951BF733F9D4BE9CA2A1840B /* Pods-BSTextDemo-BSTextDemoUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BSTextDemo-BSTextDemoUITests.release.xcconfig"; path = "Target Support Files/Pods-BSTextDemo-BSTextDemoUITests/Pods-BSTextDemo-BSTextDemoUITests.release.xcconfig"; sourceTree = "<group>"; };
 		BE5D86EDF16C4026139185D8 /* Pods-BSTextDemoUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BSTextDemoUITests.release.xcconfig"; path = "Target Support Files/Pods-BSTextDemoUITests/Pods-BSTextDemoUITests.release.xcconfig"; sourceTree = "<group>"; };
-		CAF7AD010B279A97139DCF15 /* Pods_BSTextDemo_BSTextDemoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BSTextDemo_BSTextDemoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD75291E6782662B28378F8A /* Pods-BSTextDemoUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BSTextDemoUITests.debug.xcconfig"; path = "Target Support Files/Pods-BSTextDemoUITests/Pods-BSTextDemoUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		EB552C2702C5039614DA7878 /* Pods-BSTextDemoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BSTextDemoTests.debug.xcconfig"; path = "Target Support Files/Pods-BSTextDemoTests/Pods-BSTextDemoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		F8C67BE16A815536737DFFCD /* Pods-BSTextDemoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BSTextDemoTests.release.xcconfig"; path = "Target Support Files/Pods-BSTextDemoTests/Pods-BSTextDemoTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -135,7 +131,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA6BBB3D6FE4996C5D548A02 /* Pods_BSTextDemoTests.framework in Frameworks */,
-				C90AE6EBBAD352AE209F0A99 /* Pods_BSTextDemo_BSTextDemoTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -144,7 +139,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				0F8362924609D21354221562 /* Pods_BSTextDemoUITests.framework in Frameworks */,
-				EF889028B0FB03ED4C0A6DD9 /* Pods_BSTextDemo_BSTextDemoUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -269,8 +263,6 @@
 				4B8BD8EF203494111144A38E /* Pods_BSTextDemo.framework */,
 				5054A7D00FBF84BDFD3017C2 /* Pods_BSTextDemoTests.framework */,
 				6BD437B31193762BD05A6622 /* Pods_BSTextDemoUITests.framework */,
-				CAF7AD010B279A97139DCF15 /* Pods_BSTextDemo_BSTextDemoTests.framework */,
-				66A27993C59CAFAB758644DC /* Pods_BSTextDemo_BSTextDemoUITests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -465,22 +457,11 @@
 			files = (
 			);
 			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-BSTextDemoTests/Pods-BSTextDemoTests-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/BSText/BSText.framework",
-				"${BUILT_PRODUCTS_DIR}/YYCache/YYCache.framework",
-				"${BUILT_PRODUCTS_DIR}/YYImage/YYImage.framework",
-				"${BUILT_PRODUCTS_DIR}/YYWebImage/YYWebImage.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-BSTextDemoTests/Pods-BSTextDemoTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BSText.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YYCache.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YYImage.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YYWebImage.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-BSTextDemoTests/Pods-BSTextDemoTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -493,22 +474,11 @@
 			files = (
 			);
 			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-BSTextDemoUITests/Pods-BSTextDemoUITests-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/BSText/BSText.framework",
-				"${BUILT_PRODUCTS_DIR}/YYCache/YYCache.framework",
-				"${BUILT_PRODUCTS_DIR}/YYImage/YYImage.framework",
-				"${BUILT_PRODUCTS_DIR}/YYWebImage/YYWebImage.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-BSTextDemoUITests/Pods-BSTextDemoUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BSText.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YYCache.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YYImage.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YYWebImage.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-BSTextDemoUITests/Pods-BSTextDemoUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -521,22 +491,11 @@
 			files = (
 			);
 			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-BSTextDemo/Pods-BSTextDemo-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/BSText/BSText.framework",
-				"${BUILT_PRODUCTS_DIR}/YYCache/YYCache.framework",
-				"${BUILT_PRODUCTS_DIR}/YYImage/YYImage.framework",
-				"${BUILT_PRODUCTS_DIR}/YYWebImage/YYWebImage.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-BSTextDemo/Pods-BSTextDemo-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BSText.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YYCache.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YYImage.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YYWebImage.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-BSTextDemo/Pods-BSTextDemo-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -771,16 +730,18 @@
 			baseConfigurationReference = 94177DC67F2AE6992D359D40 /* Pods-BSTextDemo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 5FW9DTQ6YS;
+				CODE_SIGN_IDENTITY = "iPhone Developer: 信用卡 浦大喜奔 (9HP873VZQW)";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = RV5GLBV859;
 				INFOPLIST_FILE = BSTextDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.GeekBruce.BSTextDemo;
+				PRODUCT_BUNDLE_IDENTIFIER = spdbInhourse.com.cn;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = debug_spdbInHourse;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -791,16 +752,18 @@
 			baseConfigurationReference = 7F866DA1F2FD70DF9C8F6683 /* Pods-BSTextDemo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 5FW9DTQ6YS;
+				CODE_SIGN_IDENTITY = "iPhone Developer: 信用卡 浦大喜奔 (9HP873VZQW)";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = RV5GLBV859;
 				INFOPLIST_FILE = BSTextDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.GeekBruce.BSTextDemo;
+				PRODUCT_BUNDLE_IDENTIFIER = spdbInhourse.com.cn;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = debug_spdbInHourse;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
