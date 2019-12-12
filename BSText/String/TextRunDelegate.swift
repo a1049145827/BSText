@@ -21,7 +21,8 @@ public class TextRunDelegate: NSObject, NSCopying, NSCoding, NSSecureCoding {
         get {
             // MARK: - 此处要使用本类对象，否则之后需要取出 Delegate 的 ConRef 的时候会出问题
             let extentBuffer = UnsafeMutablePointer<TextRunDelegate>.allocate(capacity: 1)
-            extentBuffer.pointee = self.copy() as! TextRunDelegate
+//            extentBuffer.pointee = self.copy() as! TextRunDelegate
+            extentBuffer.pointee = self
             
             var callbacks = CTRunDelegateCallbacks(version: kCTRunDelegateCurrentVersion, dealloc: { (pointer) in
                 
