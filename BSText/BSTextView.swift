@@ -1241,7 +1241,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Show or update `_magnifierRanged` based on `_trackingPoint`, and hide `_magnifierCaret`.
-    func _showMagnifierRanged() {
+    private func _showMagnifierRanged() {
         if TextUtilities.isAppExtension {
             return
         }
@@ -1317,7 +1317,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Update the showing magnifier.
-    func _updateMagnifier() {
+    private func _updateMagnifier() {
         if TextUtilities.isAppExtension {
             return
         }
@@ -1331,7 +1331,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Hide the `_magnifierCaret` and `_magnifierRanged`.
-    func _hideMagnifier() {
+    private func _hideMagnifier() {
         if TextUtilities.isAppExtension {
             return
         }
@@ -1358,7 +1358,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Show and update the UIMenuController.
-    func _showMenu() {
+    private func _showMenu() {
         var rect: CGRect
         if _selectionView.caretVisible {
             rect = _selectionView.caretView.frame
@@ -1425,7 +1425,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Hide the UIMenuController.
-    func _hideMenu() {
+    private func _hideMenu() {
         if state.showingMenu {
             state.showingMenu = false
             let menu = UIMenuController.shared
@@ -1440,7 +1440,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     
     /// Show highlight layout based on `_highlight` and `_highlightRange`
     /// If the `_highlightLayout` is nil, try to create.
-    func _showHighlight(animated: Bool) {
+    private func _showHighlight(animated: Bool) {
         let fadeDuration: TimeInterval = animated ? kHighlightFadeDuration : 0
         if _highlight == nil {
             return
@@ -1466,7 +1466,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     
     /// Show `_innerLayout` instead of `_highlightLayout`.
     /// It does not destory the `_highlightLayout`.
-    func _hideHighlight(animated: Bool) {
+    private func _hideHighlight(animated: Bool) {
         let fadeDuration: TimeInterval = animated ? kHighlightFadeDuration : 0
         if state.showingHighlight {
             state.showingHighlight = false
@@ -1475,19 +1475,19 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Show `_innerLayout` and destory the `_highlight` and `_highlightLayout`.
-    func _removeHighlight(animated: Bool) {
+    private func _removeHighlight(animated: Bool) {
         _hideHighlight(animated: animated)
         _highlight = nil
         _highlightLayout = nil
     }
     
     /// Scroll current selected range to visible.
-    @objc func _scrollSelectedRangeToVisible() {
+    @objc private func _scrollSelectedRangeToVisible() {
         _scrollRangeToVisible(_selectedTextRange)
     }
     
     /// Scroll range to visible, take account into keyboard and insets.
-    func _scrollRangeToVisible(_ range: TextRange?) {
+    private func _scrollRangeToVisible(_ range: TextRange?) {
         if range == nil {
             return
         }
@@ -1565,7 +1565,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Restore contents insets if modified by keyboard.
-    func _restoreInsets(animated: Bool) {
+    private func _restoreInsets(animated: Bool) {
         if _insetModifiedByKeyboard {
             _insetModifiedByKeyboard = false
             if animated {
@@ -1581,7 +1581,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Keyboard frame changed, scroll the caret to visible range, or modify the content insets.
-    func _keyboardChanged() {
+    private func _keyboardChanged() {
         if !isFirstResponder {
             return
         }
@@ -1599,20 +1599,21 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Start long press timer, used for 'highlight' range text action.
-    func _startLongPressTimer() {
+    private func _startLongPressTimer() {
         _longPressTimer?.invalidate()
         _longPressTimer = Timer.bs_scheduledTimer(with: kLongPressMinimumDuration, target: self, selector: #selector(self._trackDidLongPress), userInfo: nil, repeats: false)
         RunLoop.current.add(_longPressTimer!, forMode: .common)
     }
     
     /// Invalidate the long press timer.
-    func _endLongPressTimer() {
+    private func _endLongPressTimer() {
         _longPressTimer?.invalidate()
         _longPressTimer = nil
     }
     
     /// Long press detected.
-    @objc func _trackDidLongPress() {
+    @objc
+    private func _trackDidLongPress() {
         _endLongPressTimer()
         
         var dealLongPressAction = false
@@ -1688,7 +1689,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Start auto scroll timer, used for auto scroll tick.
-    func _startAutoScrollTimer() {
+    private func _startAutoScrollTimer() {
         if _autoScrollTimer == nil {
             _autoScrollTimer = Timer.bs_scheduledTimer(with: kAutoScrollMinimumDuration, target: self, selector: #selector(self._trackDidTickAutoScroll), userInfo: nil, repeats: true)
             RunLoop.current.add(_autoScrollTimer!, forMode: .common)
@@ -1696,7 +1697,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Invalidate the auto scroll, and restore the text view state.
-    func _endAutoScrollTimer() {
+    private func _endAutoScrollTimer() {
         if state.autoScrollTicked {
             flashScrollIndicators()
         }
@@ -1721,7 +1722,8 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Auto scroll ticked by timer.
-    @objc func _trackDidTickAutoScroll() {
+    @objc
+    private func _trackDidTickAutoScroll() {
         if _autoScrollOffset != 0 {
             _magnifierCaret.captureDisabled = true
             _magnifierRanged.captureDisabled = true
@@ -1811,7 +1813,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// End current touch tracking (if is tracking now), and update the state.
-    func _endTouchTracking() {
+    private func _endTouchTracking() {
         if !state.trackingTouch {
             return
         }
@@ -1836,21 +1838,22 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Start a timer to fix the selection dot.
-    func _startSelectionDotFixTimer() {
+    private func _startSelectionDotFixTimer() {
         _selectionDotFixTimer?.invalidate()
         _longPressTimer = Timer.bs_scheduledTimer(with: 1 / 15.0, target: self, selector: #selector(self._fixSelectionDot), userInfo: nil, repeats: false)
         RunLoop.current.add(_longPressTimer!, forMode: .common)
     }
     
     /// End the timer.
-    func _endSelectionDotFixTimer() {
+    private func _endSelectionDotFixTimer() {
         _selectionDotFixTimer?.invalidate()
         _selectionDotFixTimer = nil
     }
     
     /// If it shows selection grabber and this view was moved by super view,
     /// update the selection dot in window.
-    @objc func _fixSelectionDot() {
+    @objc
+    private func _fixSelectionDot() {
         if TextUtilities.isAppExtension {
             return
         }
@@ -1863,7 +1866,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Try to get the character range/position with word granularity from the tokenizer.
-    func _getClosestTokenRange(at position: TextPosition?) -> TextRange? {
+    private func _getClosestTokenRange(at position: TextPosition?) -> TextRange? {
         
         guard let position = _correctedTextPosition(position) else {
             return nil
@@ -1901,7 +1904,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Try to get the character range/position with word granularity from the tokenizer.
-    func _getClosestTokenRange(at point: CGPoint) -> TextRange? {
+    private func _getClosestTokenRange(at point: CGPoint) -> TextRange? {
         var point = point
         point = _convertPoint(toLayout: point)
         var touchRange: TextRange? = _innerLayout?.closestTextRange(at: point)
@@ -1938,7 +1941,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     
     /// Try to get the highlight property. If exist, the range will be returnd by the range pointer.
     /// If the delegate ignore the highlight, returns nil.
-    func _getHighlight(at point: CGPoint, range: NSRangePointer?) -> TextHighlight? {
+    private func _getHighlight(at point: CGPoint, range: NSRangePointer?) -> TextHighlight? {
         var point = point
         if !isHighlightable || _innerLayout?.containsHighlight == nil {
             return nil
@@ -2014,7 +2017,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Return a TextMoveDirection from `_touchBeganPoint` to `_trackingPoint`.
-    func _getMoveDirection() -> TextMoveDirection {
+    private func _getMoveDirection() -> TextMoveDirection {
         let moveH = _trackingPoint.x - _touchBeganPoint.x
         let moveV = _trackingPoint.y - _touchBeganPoint.y
         if abs(Float(moveH)) > abs(Float(moveV)) {
@@ -2030,7 +2033,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Get the auto scroll offset in one tick time.
-    func _getAutoscrollOffset() -> CGFloat {
+    private func _getAutoscrollOffset() -> CGFloat {
         if !state.trackingTouch {
             return 0
         }
@@ -2088,7 +2091,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Visible size based on bounds and insets
-    func _getVisibleSize() -> CGSize {
+    private func _getVisibleSize() -> CGSize {
         var visibleSize: CGSize = bounds.size
         visibleSize.width -= contentInset.left - contentInset.right
         visibleSize.height -= contentInset.top - contentInset.bottom
@@ -2102,7 +2105,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Returns whether the text view can paste data from pastboard.
-    func _isPasteboardContainsValidValue() -> Bool {
+    private func _isPasteboardContainsValidValue() -> Bool {
         let pasteboard = UIPasteboard.general
         if (pasteboard.string?.length ?? 0) > 0 {
             return true
@@ -2121,7 +2124,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Save current selected attributed text to pasteboard.
-    func _copySelectedTextToPasteboard() {
+    private func _copySelectedTextToPasteboard() {
         if allowsCopyAttributedString {
             let text: NSAttributedString = _innerText.attributedSubstring(from: _selectedTextRange.asRange)
             if text.length > 0 {
@@ -2136,7 +2139,8 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Update the text view state when pasteboard changed.
-    @objc func _pasteboardChanged() {
+    @objc
+    private func _pasteboardChanged() {
         if state.showingMenu {
             let menu = UIMenuController.shared
             menu.update()
@@ -2144,7 +2148,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Whether the position is valid (not out of bounds).
-    func _isTextPositionValid(_ position: TextPosition?) -> Bool {
+    private func _isTextPositionValid(_ position: TextPosition?) -> Bool {
         guard let position = position else {
             return false
         }
@@ -2164,7 +2168,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Whether the range is valid (not out of bounds).
-    func _isTextRangeValid(_ range: TextRange?) -> Bool {
+    private func _isTextRangeValid(_ range: TextRange?) -> Bool {
         if !_isTextPositionValid(range?.start) {
             return false
         }
@@ -2175,7 +2179,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Correct the position if it out of bounds.
-    func _correctedTextPosition(_ position: TextPosition?) -> TextPosition? {
+    private func _correctedTextPosition(_ position: TextPosition?) -> TextPosition? {
         guard let position = position else {
             return nil
         }
@@ -2198,7 +2202,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Correct the range if it out of bounds.
-    func _correctedTextRange(_ range: TextRange?) -> TextRange? {
+    private func _correctedTextRange(_ range: TextRange?) -> TextRange? {
         guard let range = range else {
             return nil
         }
@@ -2215,7 +2219,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Convert the point from this view to text layout.
-    func _convertPoint(toLayout point: CGPoint) -> CGPoint {
+    private func _convertPoint(toLayout point: CGPoint) -> CGPoint {
         var point = point
         let boundingSize: CGSize = _innerLayout!.textBoundingSize
         if _innerLayout?.container.isVerticalForm ?? false {
@@ -2245,7 +2249,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Convert the point from text layout to this view.
-    func _convertPoint(fromLayout point: CGPoint) -> CGPoint {
+    private func _convertPoint(fromLayout point: CGPoint) -> CGPoint {
         var point = point
         let boundingSize: CGSize = _innerLayout?.textBoundingSize ?? .zero
         if _innerLayout?.container.isVerticalForm ?? false {
@@ -2275,14 +2279,14 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Convert the rect from this view to text layout.
-    func _convertRect(toLayout rect: CGRect) -> CGRect {
+    private func _convertRect(toLayout rect: CGRect) -> CGRect {
         var rect = rect
         rect.origin = _convertPoint(toLayout: rect.origin)
         return rect
     }
     
     /// Convert the rect from text layout to this view.
-    func _convertRect(fromLayout rect: CGRect) -> CGRect {
+    private func _convertRect(fromLayout rect: CGRect) -> CGRect {
         var rect = rect
         rect.origin = _convertPoint(fromLayout: rect.origin)
         return rect
@@ -2290,7 +2294,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     
     /// Replace the range with the text, and change the `_selectTextRange`.
     /// The caller should make sure the `range` and `text` are valid before call this method.
-    func _replace(_ range: TextRange, withText text: String, notifyToDelegate notify: Bool) {
+    private func _replace(_ range: TextRange, withText text: String, notifyToDelegate notify: Bool) {
         
         if NSEqualRanges(range.asRange, _selectedTextRange.asRange) {
             if notify {
@@ -2358,7 +2362,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Save current typing attributes to the attributes holder.
-    func _updateAttributesHolder() {
+    private func _updateAttributesHolder() {
         if _innerText.length > 0 {
             let index: Int = _selectedTextRange.end.offset == 0 ? 0 : _selectedTextRange.end.offset - 1
             let attributes = _innerText.bs_attributes(at: index) ?? [:]
@@ -2371,7 +2375,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Update outer properties from current inner data.
-    func _updateOuterProperties() {
+    private func _updateOuterProperties() {
         _updateAttributesHolder()
         var style: NSParagraphStyle? = _innerText.bs_paragraphStyle
         if style == nil {
@@ -2409,7 +2413,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     /// Parse text with `textParser` and update the _selectedTextRange.
     /// @return Whether changed (text or selection)
     @discardableResult
-    func _parseText() -> Bool {
+    private func _parseText() -> Bool {
         if (textParser != nil) {
             let oldTextRange = _selectedTextRange
             var newRange = _selectedTextRange.asRange
@@ -2432,7 +2436,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Returns whether the text should be detected by the data detector.
-    func _shouldDetectText() -> Bool {
+    private func _shouldDetectText() -> Bool {
         if _dataDetector == nil {
             return false
         }
@@ -2450,7 +2454,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     
     /// Detect the data in text and add highlight to the data range.
     /// @return Whether detected.
-    func _detectText(_ text: NSMutableAttributedString?) -> Bool {
+    private func _detectText(_ text: NSMutableAttributedString?) -> Bool {
         
         guard let text = text, text.length > 0 else {
             return false
@@ -2481,7 +2485,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Returns the `root` view controller (returns nil if not found).
-    func _getRootViewController() -> UIViewController? {
+    private func _getRootViewController() -> UIViewController? {
         var ctrl: UIViewController? = nil
         let app: UIApplication? = TextUtilities.sharedApplication
         if ctrl == nil {
@@ -2507,7 +2511,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Clear the undo and redo stack, and capture current state to undo stack.
-    func _resetUndoAndRedoStack() {
+    private func _resetUndoAndRedoStack() {
         _undoStack.removeAll()
         _redoStack.removeAll()
         let object = TextViewUndoObject(text: _innerText.copy() as? NSAttributedString, range: _selectedTextRange.asRange)
@@ -2517,12 +2521,12 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Clear the redo stack.
-    func _resetRedoStack() {
+    private func _resetRedoStack() {
         _redoStack.removeAll()
     }
     
     /// Capture current state to undo stack.
-    func _saveToUndoStack() {
+    private func _saveToUndoStack() {
         if !allowsUndoAndRedo {
             return
         }
@@ -2542,7 +2546,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     /// Capture current state to redo stack.
-    func _saveToRedoStack() {
+    private func _saveToRedoStack() {
         if !allowsUndoAndRedo {
             return
         }
@@ -2560,7 +2564,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         }
     }
     
-    func _canUndo() -> Bool {
+    private func _canUndo() -> Bool {
         if _undoStack.count == 0 {
             return false
         }
@@ -2571,7 +2575,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         return true
     }
     
-    func _canRedo() -> Bool {
+    private func _canRedo() -> Bool {
         if _redoStack.count == 0 {
             return false
         }
@@ -2582,7 +2586,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         return true
     }
     
-    func _undo() {
+    private func _undo() {
         if !_canUndo() {
             return
         }
@@ -2596,7 +2600,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         state.insideUndoBlock = false
     }
     
-    func _redo() {
+    private func _redo() {
         if !_canRedo() {
             return
         }
@@ -2610,14 +2614,14 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         state.insideUndoBlock = false
     }
     
-    func _restoreFirstResponderAfterUndoAlert() {
+    private func _restoreFirstResponderAfterUndoAlert() {
         if state.firstResponderBeforeUndoAlert {
             perform(#selector(self.becomeFirstResponder), with: nil, afterDelay: 0)
         }
     }
     
     /// Show undo alert if it can undo or redo.
-    func _showUndoRedoAlert() {
+    private func _showUndoRedoAlert() {
         #if TARGET_OS_IOS
         state.firstResponderBeforeUndoAlert = isFirstResponder
         weak var _self = self
@@ -2710,7 +2714,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     
     // MARK: - Private Setter
     
-    func _setText(_ text: String?) {
+    private func _setText(_ text: String?) {
         if _text == text {
             return
         }
@@ -2720,7 +2724,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         accessibilityLabel = _text
     }
     
-    func _setFont(_ font: UIFont?) {
+    private func _setFont(_ font: UIFont?) {
         if _font == font {
             return
         }
@@ -2729,7 +2733,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         didChangeValue(forKey: "font")
     }
     
-    func _setTextColor(_ textColor: UIColor?) {
+    private func _setTextColor(_ textColor: UIColor?) {
         if _textColor === textColor {
             return
         }
@@ -2745,7 +2749,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         didChangeValue(forKey: "textColor")
     }
     
-    func _setTextAlignment(_ textAlignment: NSTextAlignment) {
+    private func _setTextAlignment(_ textAlignment: NSTextAlignment) {
         if _textAlignment == textAlignment {
             return
         }
@@ -2754,7 +2758,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         didChangeValue(forKey: "textAlignment")
     }
     
-    func _setDataDetectorTypes(_ dataDetectorTypes: UIDataDetectorTypes) {
+    private func _setDataDetectorTypes(_ dataDetectorTypes: UIDataDetectorTypes) {
         if _dataDetectorTypes == dataDetectorTypes {
             return
         }
@@ -2763,7 +2767,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         didChangeValue(forKey: "dataDetectorTypes")
     }
     
-    func _setLinkTextAttributes(_ linkTextAttributes: [NSAttributedString.Key : Any]?) {
+    private func _setLinkTextAttributes(_ linkTextAttributes: [NSAttributedString.Key : Any]?) {
         let dic1 = _linkTextAttributes as NSDictionary?, dic2 = linkTextAttributes as NSDictionary?
         if dic1 == dic2 || dic1?.isEqual(dic2) ?? false {
             return
@@ -2773,7 +2777,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         didChangeValue(forKey: "linkTextAttributes")
     }
     
-    func _setHighlightTextAttributes(_ highlightTextAttributes: [NSAttributedString.Key : Any]?) {
+    private func _setHighlightTextAttributes(_ highlightTextAttributes: [NSAttributedString.Key : Any]?) {
         let dic1 = _highlightTextAttributes as NSDictionary?, dic2 = highlightTextAttributes as NSDictionary?
         if dic1 == dic2 || dic1?.isEqual(dic2) ?? false {
             return
@@ -2783,7 +2787,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         didChangeValue(forKey: "highlightTextAttributes")
     }
     
-    func _setTextParser(_ textParser: TextParser?) {
+    private func _setTextParser(_ textParser: TextParser?) {
         if _textParser === textParser || _textParser?.isEqual(textParser) ?? false {
             return
         }
@@ -2792,7 +2796,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         didChangeValue(forKey: "textParser")
     }
     
-    func _setAttributedText(_ attributedText: NSAttributedString?) {
+    private func _setAttributedText(_ attributedText: NSAttributedString?) {
         if _attributedText == attributedText {
             return
         }
@@ -2801,7 +2805,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         didChangeValue(forKey: "attributedText")
     }
     
-    func _setTextContainerInset(_ textContainerInset: UIEdgeInsets) {
+    private func _setTextContainerInset(_ textContainerInset: UIEdgeInsets) {
         if _textContainerInset == textContainerInset {
             return
         }
@@ -2810,7 +2814,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         didChangeValue(forKey: "textContainerInset")
     }
     
-    func _setExclusionPaths(_ exclusionPaths: [UIBezierPath]?) {
+    private func _setExclusionPaths(_ exclusionPaths: [UIBezierPath]?) {
         if _exclusionPaths == exclusionPaths {
             return
         }
@@ -2819,7 +2823,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         didChangeValue(forKey: "exclusionPaths")
     }
     
-    func _setVerticalForm(_ verticalForm: Bool) {
+    private func _setVerticalForm(_ verticalForm: Bool) {
         if _verticalForm == verticalForm {
             return
         }
@@ -2828,7 +2832,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         didChangeValue(forKey: "isVerticalForm")
     }
     
-    func _setLinePositionModifier(_ linePositionModifier: TextLinePositionModifier?) {
+    private func _setLinePositionModifier(_ linePositionModifier: TextLinePositionModifier?) {
         if _linePositionModifier === linePositionModifier {
             return
         }
@@ -2837,7 +2841,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         didChangeValue(forKey: "linePositionModifier")
     }
     
-    func _setSelectedRange(_ selectedRange: NSRange) {
+    private func _setSelectedRange(_ selectedRange: NSRange) {
         if NSEqualRanges(_selectedRange, selectedRange) {
             return
         }
@@ -2849,7 +2853,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         }
     }
     
-    func _setTypingAttributes(_ typingAttributes: [NSAttributedString.Key : Any]?) {
+    private func _setTypingAttributes(_ typingAttributes: [NSAttributedString.Key : Any]?) {
         let dic1 = _typingAttributes as NSDictionary?, dic2 = typingAttributes as NSDictionary?
         if dic1 == dic2 || dic1?.isEqual(dic2) ?? false {
             return
@@ -2860,14 +2864,12 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     // MARK: - Private Init
-    func _initTextView() {
+    private func _initTextView() {
         delaysContentTouches = false
         canCancelContentTouches = true
         clipsToBounds = true
         if #available(iOS 11.0, *) {
             contentInsetAdjustmentBehavior = .never
-        } else {
-            // Fallback on earlier versions
         }
         super.delegate = self
         
@@ -2922,6 +2924,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        
         tokenizer = UITextInputStringTokenizer(textInput: self)
         _initTextView()
     }
