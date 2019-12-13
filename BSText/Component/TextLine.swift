@@ -193,7 +193,7 @@ public class TextLine: NSObject {
             if glyphCount == 0 {
                 continue
             }
-            var attrs = CTRunGetAttributes(run) as? [AnyHashable : Any]
+            let attrs = CTRunGetAttributes(run) as? [AnyHashable : Any]
             
             if let attachment = attrs?[TextAttribute.textAttachmentAttributeName] as? TextAttachment {
                 var runPosition = CGPoint.zero

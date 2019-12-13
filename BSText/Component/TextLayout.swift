@@ -3638,7 +3638,7 @@ private func TextDrawBorder(_ layout: TextLayout, context: CGContext, size: CGSi
                 let rr_ = (ll == l) ? r : 0, rrMax = CFArrayGetCount(iRuns)
                 for rr in rr_..<rrMax {
                     let iRun = unsafeBitCast(CFArrayGetValueAtIndex(iRuns, rr), to: CTRun.self)
-                    var iAttrs = CTRunGetAttributes(iRun) as? [AnyHashable : Any]
+                    let iAttrs = CTRunGetAttributes(iRun) as? [AnyHashable : Any]
                     let iBorder = iAttrs?[borderKey] as? TextBorder
                     if !(border == iBorder) {
                         endFound = true
@@ -4153,7 +4153,7 @@ private func TextDrawDebug(_ layout: TextLayout, context: CGContext, size: CGSiz
         }
     }
     
-    var lines = layout.lines
+    let lines = layout.lines
     let lMax = lines.count
     for l in 0..<lMax {
         var line = lines[l]
