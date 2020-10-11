@@ -31,6 +31,7 @@ class BSTextExample: UITableViewController {
         addCell("Undo and Redo", class: BSTextUndoRedoExample.self)
         addCell("Ruby Annotation", class: BSTextRubyExample.self)
         addCell("Async Display", class: BSTextAsyncExample.self)
+        addCell("My Example Demo", class: MyExample.self)
         
         tableView.tableFooterView = UIView()
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: kExampleCellReuseId)

@@ -41,6 +41,7 @@
 		322E396321F81687004AC265 /* MyLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322E394821F81687004AC265 /* MyLabel.swift */; };
 		322E396421F81687004AC265 /* dribbble64_imageio.png in Resources */ = {isa = PBXBuildFile; fileRef = 322E394921F81687004AC265 /* dribbble64_imageio.png */; };
 		322E396521F81687004AC265 /* BSFPSLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322E394A21F81687004AC265 /* BSFPSLabel.swift */; };
+		32557FE0249E4325009F57F9 /* MyExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32557FDF249E4325009F57F9 /* MyExample.swift */; };
 		AA6BBB3D6FE4996C5D548A02 /* Pods_BSTextDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5054A7D00FBF84BDFD3017C2 /* Pods_BSTextDemoTests.framework */; };
 		C70D65BAF91CCA8F4C3E7B0D /* Pods_BSTextDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B8BD8EF203494111144A38E /* Pods_BSTextDemo.framework */; };
 /* End PBXBuildFile section */
@@ -103,6 +104,7 @@
 		322E394821F81687004AC265 /* MyLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyLabel.swift; sourceTree = "<group>"; };
 		322E394921F81687004AC265 /* dribbble64_imageio.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dribbble64_imageio.png; sourceTree = "<group>"; };
 		322E394A21F81687004AC265 /* BSFPSLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BSFPSLabel.swift; sourceTree = "<group>"; };
+		32557FDF249E4325009F57F9 /* MyExample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyExample.swift; sourceTree = "<group>"; };
 		3FDC73D36B8A6F54C9231CD1 /* Pods-BSTextDemo-BSTextDemoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BSTextDemo-BSTextDemoTests.debug.xcconfig"; path = "Target Support Files/Pods-BSTextDemo-BSTextDemoTests/Pods-BSTextDemo-BSTextDemoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		4B8BD8EF203494111144A38E /* Pods_BSTextDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BSTextDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5054A7D00FBF84BDFD3017C2 /* Pods_BSTextDemoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BSTextDemoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -215,6 +217,7 @@
 				322E393A21F81687004AC265 /* BSTextRubyExample.swift */,
 				322E393821F81687004AC265 /* BSTextAsyncExample.swift */,
 				322E393921F81687004AC265 /* BSTextExampleHelper.swift */,
+				32557FDF249E4325009F57F9 /* MyExample.swift */,
 			);
 			path = Examples;
 			sourceTree = "<group>";
@@ -549,6 +552,7 @@
 				322E396521F81687004AC265 /* BSFPSLabel.swift in Sources */,
 				322E395321F81687004AC265 /* BSTextExample.swift in Sources */,
 				322E395121F81687004AC265 /* BSTextEditExample.swift in Sources */,
+				32557FE0249E4325009F57F9 /* MyExample.swift in Sources */,
 				322E394D21F81687004AC265 /* BSTextAttachmentExample.swift in Sources */,
 				322E395D21F81687004AC265 /* BSGestureRecognizer.swift in Sources */,
 				322E395A21F81687004AC265 /* CALayerExtension.swift in Sources */,

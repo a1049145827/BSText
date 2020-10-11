@@ -9,7 +9,6 @@
 import UIKit
 import Accelerate
 
-
 public class TextUtilities: NSObject {
     
     // MARK: - getter
