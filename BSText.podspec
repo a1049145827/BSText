@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name         = 'BSText'
-  spec.version      = '1.1.0'
+  spec.version      = '1.1.1'
   spec.platform     = :ios, '8.0'
   spec.ios.deployment_target = '8.0'
   spec.swift_version = '5.0'
