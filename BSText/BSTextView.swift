@@ -4285,9 +4285,12 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         return CGRect.zero
     }
     
-    public func selectionRects(for range: UITextRange) -> [UITextSelectionRect] {
+    public func selectionRects(for range: UITextRange?) -> [UITextSelectionRect] {
         _updateIfNeeded()
-        let rects = _innerLayout?.selectionRects(for: range as! TextRange)
+        guard let r = range as? TextRange else {
+            return []
+        }
+        let rects = _innerLayout?.selectionRects(for: r)
         
         for rect in rects ?? [] {
             rect.rect = self._convertRect(fromLayout: rect.rect)
