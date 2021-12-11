@@ -3813,7 +3813,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         if text == "" {
             return
         }
-        if !NSEqualRanges(_lastTypeRange!, _selectedTextRange.asRange) {
+        if !NSEqualRanges(_lastTypeRange ?? NSMakeRange(0, 0), _selectedTextRange.asRange) {
             _saveToUndoStack()
             _resetRedoStack()
         }
