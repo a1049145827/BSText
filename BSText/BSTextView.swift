@@ -3834,10 +3834,10 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             let binding = _innerText.attribute(NSAttributedString.Key(rawValue: TextAttribute.textBindingAttributeName), at: range.location - 1, longestEffectiveRange: &effectiveRange, in: NSRange(location: 0, length: _innerText.length)) as? TextBinding
             if binding != nil && binding?.deleteConfirm != nil {
                 state.deleteConfirm = true
-                _inputDelegate!.selectionWillChange(self)
+                _inputDelegate?.selectionWillChange(self)
                 _selectedTextRange = TextRange(range: effectiveRange)
                 _selectedTextRange = _correctedTextRange(_selectedTextRange)!
-                _inputDelegate!.selectionDidChange(self)
+                _inputDelegate?.selectionDidChange(self)
                 
                 _updateOuterProperties()
                 _updateSelectionView()
