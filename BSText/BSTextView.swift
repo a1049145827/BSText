@@ -4183,11 +4183,14 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     public func textRange(from fromPosition: UITextPosition, to toPosition: UITextPosition) -> UITextRange? {
-        return TextRange(start: fromPosition as! TextPosition, end: toPosition as! TextPosition)
+        guard let p = fromPosition as? TextPosition else {
+            return nil
+        }
+        return TextRange(start: p, end: toPosition as! TextPosition)
     }
     
     public func compare(_ position: UITextPosition, to other: UITextPosition) -> ComparisonResult {
-        return (position as! TextPosition).compare(other as? TextPosition)
+        return (position as? TextPosition)?.compare(other as? TextPosition) ?? .orderedAscending
     }
     
     public func offset(from: UITextPosition, to toPosition: UITextPosition) -> Int {
