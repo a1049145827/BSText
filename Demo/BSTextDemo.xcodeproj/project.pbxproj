@@ -734,18 +734,19 @@
 			baseConfigurationReference = 94177DC67F2AE6992D359D40 /* Pods-BSTextDemo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer: 信用卡 浦大喜奔 (9HP873VZQW)";
+				CODE_SIGN_IDENTITY = "Apple Development: kang lei (W453DD8LR9)";
 				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = RV5GLBV859;
+				DEVELOPMENT_TEAM = 9S32VVSLFY;
 				INFOPLIST_FILE = BSTextDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = spdbInhourse.com.cn;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				PRODUCT_BUNDLE_IDENTIFIER = com.bstext.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = debug_spdbInHourse;
+				PROVISIONING_PROFILE_SPECIFIER = "bbq_custom_#_v2";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -756,18 +757,19 @@
 			baseConfigurationReference = 7F866DA1F2FD70DF9C8F6683 /* Pods-BSTextDemo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer: 信用卡 浦大喜奔 (9HP873VZQW)";
+				CODE_SIGN_IDENTITY = "Apple Development: kang lei (W453DD8LR9)";
 				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = RV5GLBV859;
+				DEVELOPMENT_TEAM = 9S32VVSLFY;
 				INFOPLIST_FILE = BSTextDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = spdbInhourse.com.cn;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				PRODUCT_BUNDLE_IDENTIFIER = com.bstext.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = debug_spdbInHourse;
+				PROVISIONING_PROFILE_SPECIFIER = "bbq_custom_#_v2";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
