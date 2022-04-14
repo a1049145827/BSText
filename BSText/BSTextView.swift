@@ -2289,6 +2289,16 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     /// Replace the range with the text, and change the `_selectTextRange`.
     /// The caller should make sure the `range` and `text` are valid before call this method.
     private func _replace(_ range: TextRange, withText text: String, notifyToDelegate notify: Bool) {
+        if notify {
+            _inputDelegate?.textWillChange(self)
+        }
+        let newRange = NSRange(location: range.asRange.location, length: text.length)
+        _innerText.replaceCharacters(in: range.asRange, with: text)
+        _innerText.bs_removeDiscontinuousAttributes(in: newRange)
+
+        if notify {
+            _inputDelegate?.textDidChange(self)
+        }
         
         if NSEqualRanges(range.asRange, _selectedTextRange.asRange) {
             if notify {
@@ -2343,15 +2353,6 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                     _inputDelegate?.selectionDidChange(self)
                 }
             }
-        }
-        if notify {
-            _inputDelegate?.textWillChange(self)
-        }
-        let newRange = NSRange(location: range.asRange.location, length: text.length)
-        _innerText.replaceCharacters(in: range.asRange, with: text)
-        _innerText.bs_removeDiscontinuousAttributes(in: newRange)
-        if notify {
-            _inputDelegate?.textDidChange(self)
         }
     }
     
