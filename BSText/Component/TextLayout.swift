@@ -811,7 +811,7 @@ public class TextLayout: NSObject, NSCoding, NSCopying {
         
         if rowCount_ > 0 {
             if maximumNumberOfRows > 0 {
-                if rowCount_ > maximumNumberOfRows {
+                if rowCount_ >= maximumNumberOfRows {
                     needTruncation = true
                     rowCount_ = maximumNumberOfRows
                     repeat {
