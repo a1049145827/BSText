@@ -810,10 +810,15 @@ public class TextLayout: NSObject, NSCoding, NSCopying {
         }
         
         if rowCount_ > 0 {
-            if maximumNumberOfRows > 0 {
+            if container?.truncationToken != nil {
                 if rowCount_ >= maximumNumberOfRows {
                     needTruncation = true
-                    rowCount_ = maximumNumberOfRows
+                    if maximumNumberOfRows == 0 {
+                        maximumNumberOfRows = rowCount_
+                    } else {
+                        rowCount_ = maximumNumberOfRows
+                    }
+                     
                     repeat {
                         let line = lines_.last
                         if line == nil {
