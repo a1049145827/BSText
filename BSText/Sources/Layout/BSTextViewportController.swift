@@ -88,7 +88,8 @@ open class BSTextViewportController: NSObject {
 
         // Trigger layout for visible and prefetched area
         layoutManager.layoutViewport(prefetchRect) { [weak self] in
-            self?.delegate?.viewportControllerDidUpdateViewport?(self!)
+            guard let self = self else { return }
+            self.delegate?.viewportControllerDidUpdateViewport?(self)
         }
 
         // Recycle fragments that are far outside the visible area
@@ -101,16 +102,13 @@ open class BSTextViewportController: NSObject {
     ///
     /// - Parameter rect: The visible rect.
     private func updateVisibleTextRange(for rect: CGRect) {
-        guard let layoutManager = layoutManager else { return }
+        guard let layoutManager = layoutManager,
+              let contentManager = layoutManager.textContentManager else { return }
 
-        // Find the text range for the visible rect
-        if let startFragment = layoutManager.fragmentAtPoint(rect.origin),
-           let startLocation = startFragment.rangeInElement.location {
-            let endPoint = CGPoint(x: rect.maxX, y: rect.maxY)
-            if let endFragment = layoutManager.fragmentAtPoint(endPoint),
-               let endLocation = endFragment.rangeInElement.endLocation {
-                visibleTextRange = NSTextRange(location: startLocation, end: endLocation)
-            }
+        // Find the text range for the visible rect using layout manager's location method
+        if let startLocation = layoutManager.location(rect.origin, inTextContainer: layoutManager.textContainer),
+           let endLocation = layoutManager.location(CGPoint(x: rect.maxX, y: rect.maxY), inTextContainer: layoutManager.textContainer) {
+            visibleTextRange = NSTextRange(location: startLocation, end: endLocation)
         }
     }
 
@@ -134,10 +132,23 @@ open class BSTextViewportController: NSObject {
         // Check if the invalidated range intersects with visible range
         if let visibleRange = visibleTextRange,
            let layoutManager = layoutManager,
-           let invalidatedRange = NSTextRange(range, in: layoutManager.textContentManager),
-           invalidatedRange.overlaps(visibleRange) {
-            // Re-layout visible area
-            layoutManager.layoutViewport(visibleRect)
+           let contentManager = layoutManager.textContentManager {
+            
+            // Convert NSRange to NSTextRange for comparison
+            let startOffset = range.location
+            let endOffset = range.location + range.length
+            
+            guard let startLocation = contentManager.location?(from: contentManager.documentRange.location, offset: startOffset),
+                  let endLocation = contentManager.location?(from: contentManager.documentRange.location, offset: endOffset) else {
+                return
+            }
+            
+            let invalidatedRange = NSTextRange(location: startLocation, end: endLocation)
+            
+            if invalidatedRange.overlaps(visibleRange) {
+                // Re-layout visible area
+                layoutManager.layoutViewport(visibleRect)
+            }
         }
     }
 

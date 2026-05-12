@@ -70,15 +70,10 @@ open class BSTextLayoutManager: NSTextLayoutManager {
     public func layoutViewport(_ rect: CGRect, completion: (() -> Void)? = nil) {
         viewportSize = rect.size
 
-        // Convert rect to text range
-        if let startFragment = textLayoutFragment(for: rect.origin),
-           let startLocation = startFragment.rangeInElement.location {
-            // Find the end location
-            let endPoint = CGPoint(x: rect.maxX, y: rect.maxY)
-            if let endFragment = textLayoutFragment(for: endPoint),
-               let endLocation = endFragment.rangeInElement.endLocation {
-                visibleTextRange = NSTextRange(location: startLocation, end: endLocation)
-            }
+        // Convert rect to text range using character range
+        if let startLocation = location(rect.origin, inTextContainer: textContainer),
+           let endLocation = location(CGPoint(x: rect.maxX, y: rect.maxY), inTextContainer: textContainer) {
+            visibleTextRange = NSTextRange(location: startLocation, end: endLocation)
         }
 
         // Trigger layout for visible area
@@ -94,27 +89,8 @@ open class BSTextLayoutManager: NSTextLayoutManager {
     /// - Parameter point: The point in the text view's coordinate space.
     /// - Returns: The text layout fragment at the point, or nil if not found.
     public func fragmentAtPoint(_ point: CGPoint) -> NSTextLayoutFragment? {
-        var closestFragment: NSTextLayoutFragment?
-        var closestDistance: CGFloat = .infinity
-
-        enumerateTextLayoutFragments(from: documentRange.location, options: [.reverse, .ensuresLayout]) { fragment in
-            let fragmentFrame = fragment.layoutFragmentFrame
-            let distance = point.distance(to: fragmentFrame)
-
-            if distance < closestDistance {
-                closestDistance = distance
-                closestFragment = fragment
-            }
-
-            // Stop if we found a fragment containing the point
-            if fragmentFrame.contains(point) {
-                return false
-            }
-
-            return true
-        }
-
-        return closestFragment
+        guard let location = location(point, inTextContainer: textContainer) else { return nil }
+        return textLayoutFragment(for: location)
     }
 
     // MARK: - Invalidation
@@ -123,7 +99,18 @@ open class BSTextLayoutManager: NSTextLayoutManager {
     ///
     /// - Parameter range: The text range to invalidate.
     public func invalidateLayout(forNSRange range: NSRange) {
-        guard let textRange = NSTextRange(range, in: textContentManager) else { return }
+        guard let contentManager = textContentManager else { return }
+        
+        // Convert NSRange to NSTextRange
+        let startOffset = range.location
+        let endOffset = range.location + range.length
+        
+        guard let startLocation = contentManager.location?(from: contentManager.documentRange.location, offset: startOffset),
+              let endLocation = contentManager.location?(from: contentManager.documentRange.location, offset: endOffset) else {
+            return
+        }
+        
+        let textRange = NSTextRange(location: startLocation, end: endLocation)
         invalidateLayout(for: textRange)
     }
 
@@ -131,7 +118,18 @@ open class BSTextLayoutManager: NSTextLayoutManager {
     ///
     /// - Parameter range: The text range to invalidate.
     public func invalidateDisplay(forNSRange range: NSRange) {
-        guard let textRange = NSTextRange(range, in: textContentManager) else { return }
+        guard let contentManager = textContentManager else { return }
+        
+        // Convert NSRange to NSTextRange
+        let startOffset = range.location
+        let endOffset = range.location + range.length
+        
+        guard let startLocation = contentManager.location?(from: contentManager.documentRange.location, offset: startOffset),
+              let endLocation = contentManager.location?(from: contentManager.documentRange.location, offset: endOffset) else {
+            return
+        }
+        
+        let textRange = NSTextRange(location: startLocation, end: endLocation)
         invalidateDisplay(for: textRange)
     }
 
@@ -141,11 +139,11 @@ open class BSTextLayoutManager: NSTextLayoutManager {
         super.invalidateLayout(for: textRange)
 
         // Notify delegate
-        layoutDelegate?.layoutManager(self, didInvalidateLayoutFor: textRange)
+        layoutDelegate?.layoutManager?(self, didInvalidateLayoutFor: textRange)
 
         // Notify viewport controller
         if let contentManager = textContentManager {
-            let nsRange = NSRange(textRange, in: contentManager)
+            let nsRange = nsRange(from: textRange, in: contentManager)
             viewportController?.invalidateRange(nsRange)
         }
     }
@@ -171,6 +169,15 @@ open class BSTextLayoutManager: NSTextLayoutManager {
         var count = 0
         enumerateVisibleFragments { _ in count += 1 }
         return count
+    }
+    
+    // MARK: - Helper Methods
+    
+    /// Converts NSTextRange to NSRange
+    private func nsRange(from textRange: NSTextRange, in contentManager: NSTextContentManager) -> NSRange {
+        let startOffset = contentManager.offset?(from: contentManager.documentRange.location, to: textRange.location) ?? 0
+        let endOffset = contentManager.offset?(from: contentManager.documentRange.location, to: textRange.endLocation) ?? 0
+        return NSRange(location: startOffset, length: endOffset - startOffset)
     }
 }
 
