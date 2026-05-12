@@ -145,9 +145,8 @@ open class BSTextLayoutManager: NSTextLayoutManager {
         let startLocation = contentManager.location(contentManager.documentRange.location, offsetBy: startOffset)
         let endLocation = contentManager.location(contentManager.documentRange.location, offsetBy: endOffset)
         
-        guard let start = startLocation, let end = endLocation else { return }
-        
-        let textRange = NSTextRange(location: start, end: end)
+        guard let start = startLocation, let end = endLocation,
+              let textRange = NSTextRange(location: start, end: end) else { return }
         invalidateLayout(for: textRange)
     }
 
@@ -164,9 +163,8 @@ open class BSTextLayoutManager: NSTextLayoutManager {
         let startLocation = contentManager.location(contentManager.documentRange.location, offsetBy: startOffset)
         let endLocation = contentManager.location(contentManager.documentRange.location, offsetBy: endOffset)
         
-        guard let start = startLocation, let end = endLocation else { return }
-        
-        let textRange = NSTextRange(location: start, end: end)
+        guard let start = startLocation, let end = endLocation,
+              let textRange = NSTextRange(location: start, end: end) else { return }
         invalidateDisplay(for: textRange)
     }
 
