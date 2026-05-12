@@ -238,9 +238,9 @@ public class TextSimpleMarkdownParser: NSObject, TextParser {
         t.bs_removeAttributes(in: NSRange(location: 0, length: t.length))
         t.bs_font = font
         t.bs_color = textColor
-        let str = t.string
-        
-        regexEscape.replaceMatches(in: str as! NSMutableString, options: [], range: NSRange(location: 0, length: str.length), withTemplate: "@@")
+        let escapedString = NSMutableString(string: t.string)
+        regexEscape.replaceMatches(in: escapedString, options: [], range: NSRange(location: 0, length: escapedString.length), withTemplate: "@@")
+        let str = escapedString as String
         
         regexHeader.enumerateMatches(in: str, options: [], range: NSRange(location: 0, length: str.length), using: { result, flags, stop in
             let r: NSRange = result!.range
