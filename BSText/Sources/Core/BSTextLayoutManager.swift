@@ -70,11 +70,8 @@ open class BSTextLayoutManager: NSTextLayoutManager {
     public func layoutViewport(_ rect: CGRect, completion: (() -> Void)? = nil) {
         viewportSize = rect.size
 
-        // Convert rect to text range using character range
-        if let startLocation = location(rect.origin, inTextContainer: textContainer),
-           let endLocation = location(CGPoint(x: rect.maxX, y: rect.maxY), inTextContainer: textContainer) {
-            visibleTextRange = NSTextRange(location: startLocation, end: endLocation)
-        }
+        // Find the text range for the visible rect by enumerating fragments
+        updateVisibleTextRange(for: rect)
 
         // Trigger layout for visible area
         if let visibleRange = visibleTextRange {
@@ -83,14 +80,54 @@ open class BSTextLayoutManager: NSTextLayoutManager {
 
         completion?()
     }
+    
+    /// Updates the visible text range based on the given rect.
+    private func updateVisibleTextRange(for rect: CGRect) {
+        guard let contentManager = textContentManager else { return }
+        
+        var startLocation: NSTextLocation?
+        var endLocation: NSTextLocation?
+        
+        enumerateTextLayoutFragments(from: contentManager.documentRange.location, options: [.ensuresLayout]) { fragment in
+            let fragmentFrame = fragment.layoutFragmentFrame
+            
+            // Check if this fragment intersects with the visible rect
+            if fragmentFrame.intersects(rect) {
+                if startLocation == nil {
+                    startLocation = fragment.rangeInElement.location
+                }
+                endLocation = fragment.rangeInElement.endLocation
+            }
+            
+            // Continue until we've passed the visible rect
+            if fragmentFrame.minY > rect.maxY {
+                return false
+            }
+            
+            return true
+        }
+        
+        if let start = startLocation, let end = endLocation {
+            visibleTextRange = NSTextRange(location: start, end: end)
+        }
+    }
 
     /// Returns the text layout fragment at the specified point.
     ///
     /// - Parameter point: The point in the text view's coordinate space.
     /// - Returns: The text layout fragment at the point, or nil if not found.
     public func fragmentAtPoint(_ point: CGPoint) -> NSTextLayoutFragment? {
-        guard let location = location(point, inTextContainer: textContainer) else { return nil }
-        return textLayoutFragment(for: location)
+        guard let contentManager = textContentManager else { return nil }
+        
+        var result: NSTextLayoutFragment?
+        enumerateTextLayoutFragments(from: contentManager.documentRange.location, options: [.ensuresLayout]) { fragment in
+            if fragment.layoutFragmentFrame.contains(point) {
+                result = fragment
+                return false
+            }
+            return true
+        }
+        return result
     }
 
     // MARK: - Invalidation
@@ -105,12 +142,12 @@ open class BSTextLayoutManager: NSTextLayoutManager {
         let startOffset = range.location
         let endOffset = range.location + range.length
         
-        guard let startLocation = contentManager.location?(from: contentManager.documentRange.location, offset: startOffset),
-              let endLocation = contentManager.location?(from: contentManager.documentRange.location, offset: endOffset) else {
-            return
-        }
+        let startLocation = contentManager.location(contentManager.documentRange.location, offsetBy: startOffset)
+        let endLocation = contentManager.location(contentManager.documentRange.location, offsetBy: endOffset)
         
-        let textRange = NSTextRange(location: startLocation, end: endLocation)
+        guard let start = startLocation, let end = endLocation else { return }
+        
+        let textRange = NSTextRange(location: start, end: end)
         invalidateLayout(for: textRange)
     }
 
@@ -124,12 +161,12 @@ open class BSTextLayoutManager: NSTextLayoutManager {
         let startOffset = range.location
         let endOffset = range.location + range.length
         
-        guard let startLocation = contentManager.location?(from: contentManager.documentRange.location, offset: startOffset),
-              let endLocation = contentManager.location?(from: contentManager.documentRange.location, offset: endOffset) else {
-            return
-        }
+        let startLocation = contentManager.location(contentManager.documentRange.location, offsetBy: startOffset)
+        let endLocation = contentManager.location(contentManager.documentRange.location, offsetBy: endOffset)
         
-        let textRange = NSTextRange(location: startLocation, end: endLocation)
+        guard let start = startLocation, let end = endLocation else { return }
+        
+        let textRange = NSTextRange(location: start, end: end)
         invalidateDisplay(for: textRange)
     }
 
@@ -175,8 +212,8 @@ open class BSTextLayoutManager: NSTextLayoutManager {
     
     /// Converts NSTextRange to NSRange
     private func nsRange(from textRange: NSTextRange, in contentManager: NSTextContentManager) -> NSRange {
-        let startOffset = contentManager.offset?(from: contentManager.documentRange.location, to: textRange.location) ?? 0
-        let endOffset = contentManager.offset?(from: contentManager.documentRange.location, to: textRange.endLocation) ?? 0
+        let startOffset = contentManager.offset(from: contentManager.documentRange.location, to: textRange.location)
+        let endOffset = contentManager.offset(from: contentManager.documentRange.location, to: textRange.endLocation)
         return NSRange(location: startOffset, length: endOffset - startOffset)
     }
 }
