@@ -1219,6 +1219,7 @@ open class BSLabel: UIView, TextDebugTarget, TextAsyncLayerDelegate, NSSecureCod
     open func prepareForReuse() {
         // Cancel any pending async display operations
         (layer as? TextAsyncLayer)?.displaysAsynchronously = false
+        layer.setNeedsDisplay()
         layer.contents = nil
         innerLayout = nil
         shrinkInnerLayout = nil
