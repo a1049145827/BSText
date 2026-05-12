@@ -41,7 +41,7 @@ open class BSTextAttachment: NSTextAttachment {
     }
 
     public convenience init(type: BSTextAttachmentType, size: CGSize) {
-        self.init(data: nil, ofType: nil)
+        self.init(data: nil as Data?, ofType: nil as String?)
         self.attachmentType = type
         self.displaySize = size
     }
