@@ -40,12 +40,6 @@ open class BSTextAttachment: NSTextAttachment {
         super.init(coder: coder)
     }
 
-    public convenience init(type: BSTextAttachmentType, size: CGSize) {
-        self.init(data: nil as Data?, ofType: nil as String?)
-        self.attachmentType = type
-        self.displaySize = size
-    }
-
     /// Load the attachment content asynchronously.
     open func load() {
         state = .loading
