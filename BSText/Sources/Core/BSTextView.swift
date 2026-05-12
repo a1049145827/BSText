@@ -52,29 +52,11 @@ open class BSTextView: UITextView {
 
     // MARK: - TextKit 2 Components
 
-    /// The content storage that manages the attributed text content.
-    /// Wraps the system's `textContentStorage` with BSText enhancements.
-    public var bsContentStorage: BSTextContentStorage {
-        return _contentStorage
-    }
-
-    /// The layout manager responsible for laying out text fragments.
-    /// Wraps the system's `textLayoutManager` with BSText enhancements.
-    public var bsLayoutManager: BSTextLayoutManager {
-        return _layoutManager
-    }
-
-    /// The viewport controller that manages visible range tracking
+    /// The viewport controller that manages visible fragment layout
     /// and viewport-based layout optimization.
     public let viewportController: BSTextViewportController
 
     // MARK: - Private Properties
-
-    /// Internal storage wrapper.
-    private var _contentStorage: BSTextContentStorage!
-
-    /// Internal layout manager wrapper.
-    private var _layoutManager: BSTextLayoutManager!
 
     /// Tracks whether custom TextKit 2 components have been configured.
     private var isBSTextConfigured: Bool = false
@@ -90,6 +72,9 @@ open class BSTextView: UITextView {
         }
     }
 
+    /// Debug options for visual debugging.
+    public var debugOptions: BSTextDebugOptions = []
+
     // MARK: - Initialization
 
     /// Initializes a text view with the specified frame.
@@ -97,10 +82,15 @@ open class BSTextView: UITextView {
         // Create viewport controller first
         viewportController = BSTextViewportController()
 
-        // Initialize UITextView with a default text container
-        // UITextView will create its own TextKit 2 pipeline on iOS 17+
-        super.init(frame: frame, textContainer: textContainer)
+        // Initialize with TextKit 2 components if needed
+        let container = textContainer ?? NSTextContainer(size: frame.size)
+        container.widthTracksTextView = true
+        container.heightTracksTextView = false
 
+        // Initialize UITextView
+        super.init(frame: frame, textContainer: container)
+
+        // Set up BSText components
         setupBSText()
     }
 
@@ -113,64 +103,14 @@ open class BSTextView: UITextView {
 
     // MARK: - Setup
 
-    /// Sets up BSText enhancements on top of the system TextKit 2 pipeline.
-    ///
-    /// On iOS 17+, UITextView uses TextKit 2 by default. We wrap the system's
-    /// `textContentStorage` and `textLayoutManager` with BSText components
-    /// to add our enhancements without breaking system functionality.
+    /// Sets up BSText enhancements.
     private func setupBSText() {
         guard !isBSTextConfigured else { return }
         isBSTextConfigured = true
 
-        // Get the system's TextKit 2 components
-        // UITextView creates these automatically on iOS 17+
-        guard let systemContentStorage = textContentStorage,
-              let systemLayoutManager = textLayoutManager else {
-            // Fallback: create our own if system didn't provide them
-            setupCustomTextKit2()
-            return
-        }
-
-        // Wrap system components with BSText enhancements
-        _contentStorage = BSTextContentStorage(wrapping: systemContentStorage)
-        _layoutManager = BSTextLayoutManager(wrapping: systemLayoutManager)
-
-        // Attach viewport controller
-        viewportController.attachLayoutManager(_layoutManager)
-
         // Configure text container
-        if let container = textContainer {
-            container.widthTracksTextView = true
-            container.heightTracksTextView = false
-        }
-    }
-
-    /// Sets up a custom TextKit 2 pipeline when system components are unavailable.
-    ///
-    /// This is a fallback path that should rarely be needed on iOS 17+.
-    private func setupCustomTextKit2() {
-        // Create custom TextKit 2 components
-        let contentStorage = BSTextContentStorage()
-        let layoutManager = BSTextLayoutManager()
-        let container = NSTextContainer()
-
-        // Configure text container
-        container.widthTracksTextView = true
-        container.heightTracksTextView = false
-
-        // Link the pipeline: ContentStorage -> LayoutManager -> Container
-        layoutManager.addTextContainer(container)
-        contentStorage.addLayoutManager(layoutManager)
-
-        // Store references
-        _contentStorage = contentStorage
-        _layoutManager = layoutManager
-
-        // Attach viewport controller
-        viewportController.attachLayoutManager(layoutManager)
-
-        // Note: We cannot replace UITextView's internal components after initialization.
-        // The system's textStorage will still be used for text content.
+        textContainer.widthTracksTextView = true
+        textContainer.heightTracksTextView = false
     }
 
     // MARK: - View Lifecycle
@@ -180,6 +120,12 @@ open class BSTextView: UITextView {
 
         // Update viewport controller with current visible rect
         if viewportLayoutEnabled {
+            let visibleRect = CGRect(
+                x: contentOffset.x,
+                y: contentOffset.y,
+                width: bounds.width,
+                height: bounds.height
+            )
             viewportController.updateViewport(visibleRect)
         }
     }
@@ -200,9 +146,9 @@ open class BSTextView: UITextView {
             // the entire attributed string as it breaks composition state.
             if markedTextRange != nil {
                 // Use incremental update instead
-                textStorage?.beginEditing()
-                textStorage?.replaceCharacters(in: NSRange(location: 0, length: textStorage?.length ?? 0), with: newValue ?? NSAttributedString())
-                textStorage?.endEditing()
+                textStorage.beginEditing()
+                textStorage.replaceCharacters(in: NSRange(location: 0, length: textStorage.length), with: newValue ?? NSAttributedString())
+                textStorage.endEditing()
             } else {
                 super.attributedText = newValue
             }
@@ -218,9 +164,9 @@ open class BSTextView: UITextView {
             // During IME composition, use incremental update
             if markedTextRange != nil {
                 let attrString = NSAttributedString(string: newValue ?? "", attributes: typingAttributes)
-                textStorage?.beginEditing()
-                textStorage?.replaceCharacters(in: NSRange(location: 0, length: textStorage?.length ?? 0), with: attrString)
-                textStorage?.endEditing()
+                textStorage.beginEditing()
+                textStorage.replaceCharacters(in: NSRange(location: 0, length: textStorage.length), with: attrString)
+                textStorage.endEditing()
             } else {
                 super.text = newValue
             }
@@ -236,17 +182,15 @@ open class BSTextView: UITextView {
     ///
     /// - Parameter transform: A closure that transforms the current text storage.
     public func safeUpdateText(_ transform: (NSTextStorage) -> Void) {
-        guard let storage = textStorage else { return }
-
         // If there's an active IME composition, we need to be careful
         if markedTextRange != nil {
             // Let the composition finish first
             unmarkText()
         }
 
-        storage.beginEditing()
-        transform(storage)
-        storage.endEditing()
+        textStorage.beginEditing()
+        transform(textStorage)
+        textStorage.endEditing()
     }
 
     // MARK: - Rich Text Support
@@ -260,9 +204,9 @@ open class BSTextView: UITextView {
         let attachmentString = NSAttributedString(attachment: attachment)
         let range = selectedRange
 
-        textStorage?.beginEditing()
-        textStorage?.replaceCharacters(in: range, with: attachmentString)
-        textStorage?.endEditing()
+        textStorage.beginEditing()
+        textStorage.replaceCharacters(in: range, with: attachmentString)
+        textStorage.endEditing()
 
         // Move cursor after the attachment
         selectedRange = NSRange(location: range.location + 1, length: 0)
@@ -272,10 +216,8 @@ open class BSTextView: UITextView {
     ///
     /// - Parameter attributes: The attributes to apply.
     public func applyAttributes(_ attributes: [NSAttributedString.Key: Any]) {
-        guard let storage = textStorage else { return }
-
         if selectedRange.length > 0 {
-            storage.addAttributes(attributes, range: selectedRange)
+            textStorage.addAttributes(attributes, range: selectedRange)
         } else {
             // Apply to typing attributes
             typingAttributes.merge(attributes) { (_, new) in new }

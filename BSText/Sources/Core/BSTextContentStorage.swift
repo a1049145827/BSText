@@ -71,12 +71,14 @@ open class BSTextContentStorage: NSTextContentStorage {
     ///   - attributedString: The new attributed string content.
     ///   - options: Options for the content change.
     public func setAttributedString(_ attributedString: NSAttributedString, options: [String: Any]? = nil) {
-        textStorage?.beginEditing()
+        guard let textStorage = self.textStorage else { return }
+        
+        textStorage.beginEditing()
 
-        let fullRange = NSRange(location: 0, length: textStorage?.length ?? 0)
-        textStorage?.replaceCharacters(in: fullRange, with: attributedString)
+        let fullRange = NSRange(location: 0, length: textStorage.length)
+        textStorage.replaceCharacters(in: fullRange, with: attributedString)
 
-        textStorage?.endEditing()
+        textStorage.endEditing()
     }
 
     // MARK: - NSTextStorageDelegate
@@ -103,9 +105,11 @@ open class BSTextContentStorage: NSTextContentStorage {
     ///
     /// - Parameter edits: A closure containing the edits to perform.
     public func performBatchEdits(_ edits: () -> Void) {
-        textStorage?.beginEditing()
+        guard let textStorage = self.textStorage else { return }
+        
+        textStorage.beginEditing()
         edits()
-        textStorage?.endEditing()
+        textStorage.endEditing()
     }
 
     /// Replaces text in the specified range with new text.
@@ -114,7 +118,9 @@ open class BSTextContentStorage: NSTextContentStorage {
     ///   - range: The range of text to replace.
     ///   - text: The new text to insert.
     public func replaceText(in range: NSRange, with text: String) {
-        textStorage?.replaceCharacters(in: range, with: text)
+        guard let textStorage = self.textStorage else { return }
+        
+        textStorage.replaceCharacters(in: range, with: text)
     }
 
     /// Replaces text in the specified range with an attributed string.
@@ -123,7 +129,9 @@ open class BSTextContentStorage: NSTextContentStorage {
     ///   - range: The range of text to replace.
     ///   - attributedString: The new attributed string to insert.
     public func replaceAttributedText(in range: NSRange, with attributedString: NSAttributedString) {
-        textStorage?.replaceCharacters(in: range, with: attributedString)
+        guard let textStorage = self.textStorage else { return }
+        
+        textStorage.replaceCharacters(in: range, with: attributedString)
     }
 }
 

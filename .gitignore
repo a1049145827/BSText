@@ -137,3 +137,7 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
+
+# Development plan and tech docs
+plan.md
+BSText3_Technical_Architecture_EN_2026.md

@@ -154,18 +154,9 @@ open class BSTextLayoutManager: NSTextLayoutManager {
     ///
     /// - Parameter range: The text range to invalidate.
     public func invalidateDisplay(forNSRange range: NSRange) {
-        guard let contentManager = textContentManager else { return }
-        
-        // Convert NSRange to NSTextRange
-        let startOffset = range.location
-        let endOffset = range.location + range.length
-        
-        let startLocation = contentManager.location(contentManager.documentRange.location, offsetBy: startOffset)
-        let endLocation = contentManager.location(contentManager.documentRange.location, offsetBy: endOffset)
-        
-        guard let start = startLocation, let end = endLocation,
-              let textRange = NSTextRange(location: start, end: end) else { return }
-        invalidateDisplay(for: textRange)
+        // Since we can't call invalidateDisplay(for:) on NSTextLayoutManager directly
+        // because it doesn't exist, we'll invalidate layout instead as fallback
+        invalidateLayout(forNSRange: range)
     }
 
     // MARK: - NSTextLayoutManager Overrides
