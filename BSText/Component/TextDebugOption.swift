@@ -152,7 +152,14 @@ fileprivate var sharedDebugTargets = NSPointerArray()
     public class func remove(_ target: TextDebugTarget?) {
         
         sharedDebugLock.wait()
-        sharedDebugTargets.addObject(target)
+        // Find and remove the target from the array
+        for i in (0..<sharedDebugTargets.count).reversed() {
+            if let obj = sharedDebugTargets.object(at: i) as? TextDebugTarget,
+               obj === target {
+                sharedDebugTargets.removePointer(at: i)
+                break
+            }
+        }
         sharedDebugLock.signal()
     }
     
