@@ -1214,6 +1214,16 @@ open class BSLabel: UIView, TextDebugTarget, TextAsyncLayerDelegate, NSSecureCod
         longPressTimer?.invalidate()
     }
     
+    /// Prepares the label for reuse in a cell.
+    /// Call this method when the label is being reused in a table view or collection view cell.
+    open func prepareForReuse() {
+        // Cancel any pending async display operations
+        (layer as? TextAsyncLayer)?.displaysAsynchronously = false
+        layer.contents = nil
+        innerLayout = nil
+        shrinkInnerLayout = nil
+    }
+    
     override open class var layerClass: AnyClass {
         return TextAsyncLayer.self
     }

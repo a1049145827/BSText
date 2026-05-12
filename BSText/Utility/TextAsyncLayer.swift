@@ -164,14 +164,16 @@ public class TextAsyncLayer: CALayer {
                     task?.display!(context, size, isCancelled)
                 }
                 if isCancelled() {
-                    DispatchQueue.main.async(execute: {
+                    DispatchQueue.main.async(execute: { [weak self] in
+                        guard let self = self else { return }
                         if ((task?.didDisplay) != nil) {
                             task?.didDisplay!(self, false)
                         }
                     })
                     return
                 }
-                DispatchQueue.main.async(execute: {
+                DispatchQueue.main.async(execute: { [weak self] in
+                    guard let self = self else { return }
                     if isCancelled() {
                         if ((task?.didDisplay) != nil) {
                             task?.didDisplay!(self, false)
