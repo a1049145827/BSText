@@ -44,6 +44,10 @@ open class BSTextContentStorage: NSTextContentStorage {
         super.init()
     }
 
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
     /// Creates a wrapper around an existing NSTextContentStorage.
     ///
     /// This initializer is used when wrapping the system's content storage
@@ -75,18 +79,19 @@ open class BSTextContentStorage: NSTextContentStorage {
         endEditing()
     }
 
-    // MARK: - NSTextContentStorage Overrides
+    // MARK: - NSTextStorageDelegate
 
-    open override func processEditing() {
-        super.processEditing()
-
+    /// Called when the text storage finishes editing.
+    open func textStorageDidProcessEditing(_ notification: Notification) {
         guard tracksChanges else { return }
 
         // Notify delegate of the change
-        let editedRange = editedRange
-        let changeInLength = changeInLength
+        if let textStorage = notification.object as? NSTextStorage {
+            let editedRange = textStorage.editedRange
+            let changeInLength = textStorage.changeInLength
 
-        contentDelegate?.contentStorage(self, didEditInRange: editedRange, changeInLength: changeInLength)
+            contentDelegate?.contentStorage(self, didEditInRange: editedRange, changeInLength: changeInLength)
+        }
 
         // TODO: Trigger syntax invalidation for the edited range
         // TODO: Sync block models if needed
@@ -108,7 +113,7 @@ open class BSTextContentStorage: NSTextContentStorage {
     /// - Parameters:
     ///   - range: The range of text to replace.
     ///   - text: The new text to insert.
-    public func replaceText(in range: NSRange, with text: String) {
+    public func replaceCharacters(in range: NSRange, with text: String) {
         textStorage?.replaceCharacters(in: range, with: text)
     }
 
@@ -117,7 +122,7 @@ open class BSTextContentStorage: NSTextContentStorage {
     /// - Parameters:
     ///   - range: The range of text to replace.
     ///   - attributedString: The new attributed string to insert.
-    public func replaceText(in range: NSRange, with attributedString: NSAttributedString) {
+    public func replaceCharacters(in range: NSRange, with attributedString: NSAttributedString) {
         textStorage?.replaceCharacters(in: range, with: attributedString)
     }
 }

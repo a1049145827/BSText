@@ -1,6 +1,6 @@
 //
 //  BSTextAttachment.swift
-//  BSText
+//  BSText 3.0
 //
 //  Modern attachment system supporting images, videos, views, and async loading.
 //
@@ -40,8 +40,12 @@ open class BSTextAttachment: NSTextAttachment {
         super.init()
     }
 
-    public init(type: BSTextAttachmentType, size: CGSize) {
-        super.init()
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
+    public convenience init(type: BSTextAttachmentType, size: CGSize) {
+        self.init()
         self.attachmentType = type
         self.displaySize = size
     }

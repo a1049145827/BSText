@@ -104,10 +104,10 @@ open class BSTextViewportController: NSObject {
         guard let layoutManager = layoutManager else { return }
 
         // Find the text range for the visible rect
-        if let startFragment = layoutManager.textLayoutFragment(for: rect.origin),
+        if let startFragment = layoutManager.fragmentAtPoint(rect.origin),
            let startLocation = startFragment.rangeInElement.location {
             let endPoint = CGPoint(x: rect.maxX, y: rect.maxY)
-            if let endFragment = layoutManager.textLayoutFragment(for: endPoint),
+            if let endFragment = layoutManager.fragmentAtPoint(endPoint),
                let endLocation = endFragment.rangeInElement.endLocation {
                 visibleTextRange = NSTextRange(location: startLocation, end: endLocation)
             }

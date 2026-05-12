@@ -1,6 +1,6 @@
 //
 //  BSTextFragment.swift
-//  BSText
+//  BSText 3.0
 //
 //  Custom text layout fragment with caching and async preparation support.
 //
@@ -15,17 +15,15 @@ open class BSTextFragment: NSTextLayoutFragment {
     /// Whether this fragment has been fully prepared for display.
     public private(set) var isPrepared: Bool = false
 
-    /// Cached glyph layout data for this fragment.
-    public private(set) var cachedLayout: NSTextLayoutFragment.Layout?
-
     /// Decoration renderers attached to this fragment.
     public var decorations: [BSTextDecoration] = []
 
-    public override init(
-        textElement: NSTextElement,
-        range: NSRange
-    ) {
+    public override init(textElement: NSTextElement, range: NSRange) {
         super.init(textElement: textElement, range: range)
+    }
+
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
     }
 
     /// Asynchronously prepare this fragment for display.
@@ -33,6 +31,7 @@ open class BSTextFragment: NSTextLayoutFragment {
         // TODO: Implement async glyph layout
         // TODO: Decode attachments
         // TODO: Prepare decorations
+        isPrepared = true
     }
 
     /// Render decorations into the given context.

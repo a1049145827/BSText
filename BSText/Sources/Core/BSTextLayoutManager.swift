@@ -46,6 +46,10 @@ open class BSTextLayoutManager: NSTextLayoutManager {
         super.init()
     }
 
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
     /// Creates a wrapper around an existing NSTextLayoutManager.
     ///
     /// - Parameter wrapping: The system layout manager to wrap.
@@ -67,8 +71,8 @@ open class BSTextLayoutManager: NSTextLayoutManager {
         viewportSize = rect.size
 
         // Convert rect to text range
-        if let textLayoutFragment = textLayoutFragment(for: rect.origin),
-           let startLocation = textLayoutFragment.rangeInElement.location {
+        if let startFragment = textLayoutFragment(for: rect.origin),
+           let startLocation = startFragment.rangeInElement.location {
             // Find the end location
             let endPoint = CGPoint(x: rect.maxX, y: rect.maxY)
             if let endFragment = textLayoutFragment(for: endPoint),
@@ -78,7 +82,9 @@ open class BSTextLayoutManager: NSTextLayoutManager {
         }
 
         // Trigger layout for visible area
-        ensureLayout(for: visibleTextRange)
+        if let visibleRange = visibleTextRange {
+            ensureLayout(for: visibleRange)
+        }
 
         completion?()
     }
@@ -87,7 +93,7 @@ open class BSTextLayoutManager: NSTextLayoutManager {
     ///
     /// - Parameter point: The point in the text view's coordinate space.
     /// - Returns: The text layout fragment at the point, or nil if not found.
-    public func textLayoutFragment(for point: CGPoint) -> NSTextLayoutFragment? {
+    public func fragmentAtPoint(_ point: CGPoint) -> NSTextLayoutFragment? {
         var closestFragment: NSTextLayoutFragment?
         var closestDistance: CGFloat = .infinity
 
@@ -116,7 +122,7 @@ open class BSTextLayoutManager: NSTextLayoutManager {
     /// Invalidates layout for the specified text range.
     ///
     /// - Parameter range: The text range to invalidate.
-    public func invalidateLayout(for range: NSRange) {
+    public func invalidateLayout(forNSRange range: NSRange) {
         guard let textRange = NSTextRange(range, in: textContentManager) else { return }
         invalidateLayout(for: textRange)
     }
@@ -124,7 +130,7 @@ open class BSTextLayoutManager: NSTextLayoutManager {
     /// Invalidates display for the specified text range.
     ///
     /// - Parameter range: The text range to invalidate.
-    public func invalidateDisplay(for range: NSRange) {
+    public func invalidateDisplay(forNSRange range: NSRange) {
         guard let textRange = NSTextRange(range, in: textContentManager) else { return }
         invalidateDisplay(for: textRange)
     }
@@ -138,19 +144,10 @@ open class BSTextLayoutManager: NSTextLayoutManager {
         layoutDelegate?.layoutManager(self, didInvalidateLayoutFor: textRange)
 
         // Notify viewport controller
-        viewportController?.invalidateRange(NSRange(textRange, in: textContentManager))
-    }
-
-    open override func textLayoutFragment(for location: NSTextLocation) -> NSTextLayoutFragment {
-        let fragment = super.textLayoutFragment(for: location)
-
-        // Wrap in BSTextFragment if needed for custom rendering
-        // Note: NSTextLayoutManager creates fragments internally,
-        // so we can't directly return a BSTextFragment here.
-        // Custom fragment behavior is handled via subclassing NSTextLayoutFragment
-        // and overriding textLayoutFragment(for:).
-
-        return fragment
+        if let contentManager = textContentManager {
+            let nsRange = NSRange(textRange, in: contentManager)
+            viewportController?.invalidateRange(nsRange)
+        }
     }
 
     // MARK: - Fragment Management
