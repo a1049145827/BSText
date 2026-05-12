@@ -71,12 +71,12 @@ open class BSTextContentStorage: NSTextContentStorage {
     ///   - attributedString: The new attributed string content.
     ///   - options: Options for the content change.
     public func setAttributedString(_ attributedString: NSAttributedString, options: [String: Any]? = nil) {
-        beginEditing()
+        textStorage?.beginEditing()
 
         let fullRange = NSRange(location: 0, length: textStorage?.length ?? 0)
         textStorage?.replaceCharacters(in: fullRange, with: attributedString)
 
-        endEditing()
+        textStorage?.endEditing()
     }
 
     // MARK: - NSTextStorageDelegate
@@ -90,7 +90,7 @@ open class BSTextContentStorage: NSTextContentStorage {
             let editedRange = textStorage.editedRange
             let changeInLength = textStorage.changeInLength
 
-            contentDelegate?.contentStorage(self, didEditInRange: editedRange, changeInLength: changeInLength)
+            contentDelegate?.contentStorage?(self, didEditInRange: editedRange, changeInLength: changeInLength)
         }
 
         // TODO: Trigger syntax invalidation for the edited range
@@ -103,9 +103,9 @@ open class BSTextContentStorage: NSTextContentStorage {
     ///
     /// - Parameter edits: A closure containing the edits to perform.
     public func performBatchEdits(_ edits: () -> Void) {
-        beginEditing()
+        textStorage?.beginEditing()
         edits()
-        endEditing()
+        textStorage?.endEditing()
     }
 
     /// Replaces text in the specified range with new text.
