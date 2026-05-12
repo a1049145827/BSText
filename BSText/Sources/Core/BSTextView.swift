@@ -126,10 +126,13 @@ open class BSTextView: UITextView {
         guard !isBSTextConfigured else { return }
         isBSTextConfigured = true
 
-        // Note: Since we're inheriting from UITextView, it creates its own
-        // TextKit 2 components internally. We'll use those and wrap them
-        // with our viewport controller and delegate methods.
-        
+        // Attach viewport controller to system layout manager if available
+        if #available(iOS 17.0, *) {
+            if let layoutManager = self.textLayoutManager {
+                viewportController.attachLayoutManager(layoutManager)
+            }
+        }
+
         // Configure text container
         textContainer.widthTracksTextView = true
         textContainer.heightTracksTextView = false
@@ -170,7 +173,8 @@ open class BSTextView: UITextView {
         context.saveGState()
 
         // Draw fragment bounds using system's layout manager if available
-        if let layoutManager = self.textLayoutManager {
+        if #available(iOS 17.0, *), let layoutManager = self.textLayoutManager {
+            var fragmentCount = 0
             layoutManager.enumerateTextLayoutFragments(
                 from: layoutManager.documentRange.location,
                 options: []
@@ -192,9 +196,18 @@ open class BSTextView: UITextView {
                     .foregroundColor: UIColor.systemBlue
                 ]
                 labelText.draw(at: CGPoint(x: fragmentFrame.minX + 2, y: fragmentFrame.minY + 2), withAttributes: attributes)
-
+                
+                fragmentCount += 1
                 return true
             }
+            
+            // Draw fragment count
+            let countLabel = "Fragments: \(fragmentCount)"
+            let countAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.boldSystemFont(ofSize: 10),
+                .foregroundColor: UIColor.red
+            ]
+            countLabel.draw(at: CGPoint(x: rect.minX + 5, y: rect.minY + 5), withAttributes: countAttributes)
         }
 
         context.restoreGState()
@@ -292,6 +305,13 @@ open class BSTextView: UITextView {
             // Apply to typing attributes
             typingAttributes.merge(attributes) { (_, new) in new }
         }
+    }
+    
+    // MARK: - Viewport Helper
+    
+    /// Returns the number of visible fragments for debugging purposes.
+    public var visibleFragmentCount: Int {
+        return viewportController.estimatedVisibleFragmentCount()
     }
 }
 

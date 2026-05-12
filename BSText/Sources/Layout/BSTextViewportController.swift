@@ -11,9 +11,9 @@ import UIKit
 /// Controls which text fragments are laid out based on viewport visibility.
 ///
 /// `BSTextViewportController` implements viewport-based layout optimization:
-/// - Only visible fragments are fully laid out
+/// - Tracks visible fragments
 /// - Adjacent fragments are prefetched for smooth scrolling
-/// - Off-screen fragments can be recycled to reduce memory
+/// - Works with system's NSTextLayoutManager
 ///
 /// This approach enables BSText to handle very large documents (100k+ lines)
 /// while maintaining smooth 60/120 FPS scrolling.
@@ -24,7 +24,7 @@ open class BSTextViewportController: NSObject {
     // MARK: - Properties
 
     /// The layout manager this controller operates on.
-    public weak var layoutManager: BSTextLayoutManager?
+    public weak var layoutManager: NSTextLayoutManager?
 
     /// The current visible viewport rect in the text view's coordinate space.
     public private(set) var visibleRect: CGRect = .zero
@@ -57,14 +57,17 @@ open class BSTextViewportController: NSObject {
     /// Attach a layout manager to this controller.
     ///
     /// - Parameter layoutManager: The layout manager to control.
-    open func attachLayoutManager(_ layoutManager: BSTextLayoutManager) {
+    open func attachLayoutManager(_ layoutManager: NSTextLayoutManager) {
         self.layoutManager = layoutManager
-        layoutManager.viewportController = self
+        // If using BSTextLayoutManager, set its viewportController
+        if let bsLayoutManager = layoutManager as? BSTextLayoutManager {
+            bsLayoutManager.viewportController = self
+        }
     }
 
     // MARK: - Viewport Management
 
-    /// Update the viewport and trigger layout for visible fragments.
+    /// Update the viewport and track visible fragments.
     ///
     /// This method should be called from the text view's `layoutSubviews`
     /// or when the visible rect changes due to scrolling.
@@ -84,53 +87,67 @@ open class BSTextViewportController: NSObject {
         let prefetchRect = rect.insetBy(dx: 0, dy: -prefetchInset)
 
         // Update visible text range
-        updateVisibleTextRange(for: rect)
+        updateVisibleTextRange(for: rect, prefetchRect: prefetchRect)
 
-        // Trigger layout for visible and prefetched area
-        layoutManager.layoutViewport(prefetchRect) { [weak self] in
-            guard let self = self else { return }
-            self.delegate?.viewportControllerDidUpdateViewport?(self)
-        }
-
-        // Recycle fragments that are far outside the visible area
-        if significantChange {
-            recycleOffScreenFragments()
-        }
+        // Notify delegate of viewport update
+        delegate?.viewportControllerDidUpdateViewport?(self)
     }
 
     /// Updates the visible text range based on the given rect.
     ///
-    /// - Parameter rect: The visible rect.
-    private func updateVisibleTextRange(for rect: CGRect) {
+    /// - Parameters:
+    ///   - rect: The visible rect.
+    ///   - prefetchRect: The prefetch rect.
+    private func updateVisibleTextRange(for rect: CGRect, prefetchRect: CGRect) {
         guard let layoutManager = layoutManager,
               let contentManager = layoutManager.textContentManager else { return }
 
         // Find the text range for the visible rect
-        // Use the document range and enumerate fragments to find visible range
-        var startLocation: NSTextLocation?
-        var endLocation: NSTextLocation?
+        var visibleStartLocation: NSTextLocation?
+        var visibleEndLocation: NSTextLocation?
+        var prefetchedStartLocation: NSTextLocation?
+        var prefetchedEndLocation: NSTextLocation?
         
-        layoutManager.enumerateTextLayoutFragments(from: contentManager.documentRange.location, options: [.ensuresLayout]) { fragment in
+        layoutManager.enumerateTextLayoutFragments(
+            from: contentManager.documentRange.location,
+            options: [.ensuresLayout]
+        ) { fragment in
             let fragmentFrame = fragment.layoutFragmentFrame
             
             // Check if this fragment intersects with the visible rect
             if fragmentFrame.intersects(rect) {
-                if startLocation == nil {
-                    startLocation = fragment.rangeInElement.location
+                if visibleStartLocation == nil {
+                    visibleStartLocation = fragment.rangeInElement.location
                 }
-                endLocation = fragment.rangeInElement.endLocation
+                visibleEndLocation = fragment.rangeInElement.endLocation
             }
             
-            // Continue until we've passed the visible rect
-            if fragmentFrame.minY > rect.maxY {
+            // Check if this fragment intersects with the prefetch rect
+            if fragmentFrame.intersects(prefetchRect) {
+                if prefetchedStartLocation == nil {
+                    prefetchedStartLocation = fragment.rangeInElement.location
+                }
+                prefetchedEndLocation = fragment.rangeInElement.endLocation
+            }
+            
+            // Continue until we've passed the prefetch rect
+            if fragmentFrame.minY > prefetchRect.maxY {
                 return false
             }
             
             return true
         }
         
-        if let start = startLocation, let end = endLocation {
+        if let start = visibleStartLocation, let end = visibleEndLocation {
             visibleTextRange = NSTextRange(location: start, end: end)
+        } else {
+            visibleTextRange = nil
+        }
+        
+        if let start = prefetchedStartLocation, let end = prefetchedEndLocation {
+            prefetchedTextRange = NSTextRange(location: start, end: end)
+        } else {
+            prefetchedTextRange = nil
         }
     }
 
@@ -141,6 +158,7 @@ open class BSTextViewportController: NSObject {
         // 1. Identifying fragments outside the prefetch rect
         // 2. Moving them to a recycle pool
         // 3. Reusing them when new fragments are needed
+        // Note: In TextKit 2, fragment recycling is typically handled internally
     }
 
     // MARK: - Invalidation
@@ -169,8 +187,13 @@ open class BSTextViewportController: NSObject {
         
         // Check if ranges intersect
         if rangesIntersect(invalidatedRange, visibleRange) {
-            // Re-layout visible area
-            layoutManager.layoutViewport(visibleRect)
+            // Re-layout visible area if using BSTextLayoutManager
+            if let bsLayoutManager = layoutManager as? BSTextLayoutManager {
+                bsLayoutManager.layoutViewport(visibleRect)
+            } else {
+                // For system layout manager, just invalidate the range
+                layoutManager.invalidateLayout(for: invalidatedRange)
+            }
         }
     }
 
@@ -199,7 +222,42 @@ open class BSTextViewportController: NSObject {
     /// - Returns: The estimated count of visible fragments.
     public func estimatedVisibleFragmentCount() -> Int {
         guard let layoutManager = layoutManager else { return 0 }
-        return layoutManager.visibleFragmentCount()
+        
+        if let bsLayoutManager = layoutManager as? BSTextLayoutManager {
+            return bsLayoutManager.visibleFragmentCount()
+        }
+        
+        // Fallback: estimate based on enumeration
+        var count = 0
+        enumerateVisibleFragments { _ in count += 1 }
+        return count
+    }
+    
+    /// Enumerates all visible text layout fragments.
+    ///
+    /// - Parameter block: A closure called for each visible fragment.
+    public func enumerateVisibleFragments(_ block: (NSTextLayoutFragment) -> Void) {
+        guard let layoutManager = layoutManager,
+              let contentManager = layoutManager.textContentManager else { return }
+        
+        let rect = visibleRect
+        
+        layoutManager.enumerateTextLayoutFragments(
+            from: contentManager.documentRange.location,
+            options: [.ensuresLayout]
+        ) { fragment in
+            let fragmentFrame = fragment.layoutFragmentFrame
+            
+            if fragmentFrame.intersects(rect) {
+                block(fragment)
+            }
+            
+            if fragmentFrame.minY > rect.maxY {
+                return false
+            }
+            
+            return true
+        }
     }
     
     // MARK: - Helper Methods
@@ -237,3 +295,4 @@ open class BSTextViewportController: NSObject {
     ///   - count: The number of fragments recycled.
     @objc optional func viewportController(_ controller: BSTextViewportController, didRecycleFragments count: Int)
 }
+
