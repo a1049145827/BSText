@@ -3,78 +3,104 @@
 //  BSText 3.0
 //
 //  Common types and protocols used throughout BSText 3.
-//  Defines attachment types, loading protocols, and shared enums.
 //
 
 import UIKit
-import SwiftUI
 
 // MARK: - Attachment Types
 
-/// Represents the type of content a text attachment can display.
-/// Used by BSTextAttachment to determine rendering and loading behavior.
+/// The type of content an attachment represents.
 @objc public enum BSTextAttachmentType: Int {
-    /// A static image attachment.
-    case image
-    /// An animated image attachment (e.g., GIF, APNG).
-    case animatedImage
-    /// A video attachment with playback support.
-    case video
-    /// A custom UIView embedded as an attachment.
-    case view
-    /// A SwiftUI view embedded as an attachment.
-    case swiftUI
-    /// An asynchronously loaded attachment (e.g., remote image).
-    case async
+    /// A static image.
+    case image = 0
+    /// An animated image (GIF, APNG, WebP).
+    case animatedImage = 1
+    /// A video attachment.
+    case video = 2
+    /// A UIView attachment.
+    case view = 3
+    /// A SwiftUI View attachment.
+    case swiftUI = 4
+    /// An asynchronously loaded attachment.
+    case async = 5
 }
 
 // MARK: - Attachment Loading Protocol
 
-/// A protocol for text attachments that support asynchronous loading.
-///
-/// Conforming types should implement `load()` to begin fetching or
-/// decoding their content. The text view will call this method when
-/// the attachment becomes visible in the viewport.
+/// Protocol for attachment loading lifecycle.
 @objc public protocol BSTextAttachmentLoading: AnyObject {
 
-    /// Begins loading the attachment content.
-    /// Implementations should handle caching and error states internally.
+    /// Begin loading the attachment content.
     func load()
+
+    /// Cancel any in-progress loading.
+    @objc optional func cancelLoad()
 }
 
-// MARK: - Viewport Controller Placeholder
+// MARK: - Text Position Types
 
-/// Manages visible range tracking and viewport-based layout optimization.
-/// Works in conjunction with BSTextLayoutManager to only lay out
-/// text fragments that are currently visible on screen.
-@objcMembers
-public class BSTextViewportController: NSObject {
+/// Represents the vertical alignment of text within a line.
+@objc public enum BSTextVerticalAlignment: Int {
+    /// Align with the top of the line.
+    case top = 0
+    /// Align with the center of the line.
+    case center = 1
+    /// Align with the bottom of the line.
+    case bottom = 2
+}
 
-    /// The layout manager this viewport controller is attached to.
-    private weak var attachedLayoutManager: BSTextLayoutManager?
+// MARK: - Decoration Types
 
-    // MARK: - Initialization
+/// Represents the type of text decoration.
+@objc public enum BSTextDecorationType: Int {
+    /// A background highlight.
+    case background = 0
+    /// An underline.
+    case underline = 1
+    /// A strikethrough.
+    case strikethrough = 2
+    /// A border around the text.
+    case border = 3
+    /// A custom decoration.
+    case custom = 4
+}
 
-    /// Creates a viewport controller with default settings.
-    public override init() {
-        super.init()
+// MARK: - Layout Direction
+
+/// Represents the text layout direction.
+@objc public enum BSTextLayoutDirection: Int {
+    /// Left to right.
+    case leftToRight = 0
+    /// Right to left.
+    case rightToLeft = 1
+    /// Top to bottom.
+    case topToBottom = 2
+    /// Bottom to top.
+    case bottomToTop = 3
+}
+
+// MARK: - Debug Helpers
+
+/// Debug options for BSText.
+public struct BSTextDebugOptions: OptionSet {
+    public let rawValue: Int
+
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
     }
 
-    // MARK: - Attachment
+    /// Show layout fragment bounds.
+    public static let showFragments = BSTextDebugOptions(rawValue: 1 << 0)
 
-    /// Attaches the viewport controller to the given layout manager.
-    ///
-    /// - Parameter layoutManager: The layout manager to track viewport for.
-    public func attachLayoutManager(_ layoutManager: BSTextLayoutManager) {
-        self.attachedLayoutManager = layoutManager
-    }
+    /// Show text container bounds.
+    public static let showTextContainer = BSTextDebugOptions(rawValue: 1 << 1)
 
-    // MARK: - Viewport Management
+    /// Show line fragment bounds.
+    public static let showLineFragments = BSTextDebugOptions(rawValue: 1 << 2)
 
-    /// Updates the visible viewport rectangle.
-    ///
-    /// - Parameter rect: The visible rectangle in the text view's coordinate space.
-    public func updateViewport(_ rect: CGRect) {
-        // TODO: Implement viewport tracking and trigger layout for visible range
-    }
+    /// Show selection rects.
+    public static let showSelection = BSTextDebugOptions(rawValue: 1 << 3)
+
+    /// Show all debug overlays.
+    public static let all: BSTextDebugOptions = [.showFragments, .showTextContainer, .showLineFragments, .showSelection]
 }

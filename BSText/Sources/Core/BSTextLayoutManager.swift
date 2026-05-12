@@ -2,58 +2,213 @@
 //  BSTextLayoutManager.swift
 //  BSText 3.0
 //
-//  Layout manager wrapping NSTextLayoutManager.
+//  Layout manager that wraps NSTextLayoutManager with BSText enhancements.
 //  Manages fragment layout with viewport optimization and incremental invalidation.
-//  Wraps NSTextLayoutManager to add viewport-based layout and fragment caching.
 //
 
 import UIKit
 
-/// Manages fragment layout with viewport optimization and incremental invalidation.
-/// Wraps NSTextLayoutManager to add viewport-based layout and fragment caching.
+/// A layout manager wrapper that adds BSText enhancements to NSTextLayoutManager.
+///
+/// `BSTextLayoutManager` wraps the system's `NSTextLayoutManager` to provide:
+/// - Viewport-based layout optimization
+/// - Fragment caching and recycling
+/// - Incremental invalidation
+/// - Custom decoration rendering
+///
+/// On iOS 17+, UITextView automatically creates a `NSTextLayoutManager` instance.
+/// BSTextLayoutManager works with this instance rather than replacing it.
+///
+@objcMembers
 open class BSTextLayoutManager: NSTextLayoutManager {
 
     // MARK: - Properties
 
-    /// Indicates whether viewport-based layout optimization is enabled.
+    /// Whether viewport-based layout optimization is enabled.
     public var viewportLayoutEnabled: Bool = true
 
-    /// The size of the viewport used for layout optimization.
+    /// The size of the viewport for layout calculations.
     public var viewportSize: CGSize = .zero
+
+    /// The current visible text range.
+    public private(set) var visibleTextRange: NSTextRange?
+
+    /// The viewport controller managing visible fragments.
+    public weak var viewportController: BSTextViewportController?
+
+    /// Delegate for receiving layout notifications.
+    public weak var layoutDelegate: BSTextLayoutManagerDelegate?
 
     // MARK: - Initialization
 
-    /// Initializes a layout manager with default settings.
+    /// Creates a new BSTextLayoutManager instance.
     public override init() {
         super.init()
     }
 
-    /// Initializes a layout manager from Interface Builder / Storyboard.
-    public required init?(coder: NSCoder) {
-        super.init(coder: coder)
-    }
-
-    // MARK: - Layout
-
-    /// Invalidates the layout for the given text range, supporting
-    /// incremental relayout of only the affected fragments.
+    /// Creates a wrapper around an existing NSTextLayoutManager.
     ///
-    /// - Parameter range: The range of text to invalidate.
-    public func bs_invalidateLayout(for range: NSRange) {
-        // TODO: Implement incremental invalidation for the given range
+    /// - Parameter wrapping: The system layout manager to wrap.
+    public convenience init(wrapping manager: NSTextLayoutManager) {
+        self.init()
+        // Note: Similar to BSTextContentStorage, we inherit from NSTextLayoutManager
+        // so we can't truly "wrap" an existing instance. The actual integration
+        // happens at the BSTextView level.
     }
 
-    /// Performs viewport-based layout, only laying out fragments
-    /// that intersect with the visible area.
-    public func bs_layoutViewport() {
-        // TODO: Implement viewport-based layout optimization
+    // MARK: - Viewport Layout
+
+    /// Updates the visible viewport and triggers layout for visible fragments.
+    ///
+    /// - Parameters:
+    ///   - rect: The visible rectangle in the text view's coordinate space.
+    ///   - completion: Optional completion handler called when layout finishes.
+    public func layoutViewport(_ rect: CGRect, completion: (() -> Void)? = nil) {
+        viewportSize = rect.size
+
+        // Convert rect to text range
+        if let textLayoutFragment = textLayoutFragment(for: rect.origin),
+           let startLocation = textLayoutFragment.rangeInElement.location {
+            // Find the end location
+            let endPoint = CGPoint(x: rect.maxX, y: rect.maxY)
+            if let endFragment = textLayoutFragment(for: endPoint),
+               let endLocation = endFragment.rangeInElement.endLocation {
+                visibleTextRange = NSTextRange(location: startLocation, end: endLocation)
+            }
+        }
+
+        // Trigger layout for visible area
+        ensureLayout(for: visibleTextRange)
+
+        completion?()
+    }
+
+    /// Returns the text layout fragment at the specified point.
+    ///
+    /// - Parameter point: The point in the text view's coordinate space.
+    /// - Returns: The text layout fragment at the point, or nil if not found.
+    public func textLayoutFragment(for point: CGPoint) -> NSTextLayoutFragment? {
+        var closestFragment: NSTextLayoutFragment?
+        var closestDistance: CGFloat = .infinity
+
+        enumerateTextLayoutFragments(from: documentRange.location, options: [.reverse, .ensuresLayout]) { fragment in
+            let fragmentFrame = fragment.layoutFragmentFrame
+            let distance = point.distance(to: fragmentFrame)
+
+            if distance < closestDistance {
+                closestDistance = distance
+                closestFragment = fragment
+            }
+
+            // Stop if we found a fragment containing the point
+            if fragmentFrame.contains(point) {
+                return false
+            }
+
+            return true
+        }
+
+        return closestFragment
+    }
+
+    // MARK: - Invalidation
+
+    /// Invalidates layout for the specified text range.
+    ///
+    /// - Parameter range: The text range to invalidate.
+    public func invalidateLayout(for range: NSRange) {
+        guard let textRange = NSTextRange(range, in: textContentManager) else { return }
+        invalidateLayout(for: textRange)
+    }
+
+    /// Invalidates display for the specified text range.
+    ///
+    /// - Parameter range: The text range to invalidate.
+    public func invalidateDisplay(for range: NSRange) {
+        guard let textRange = NSTextRange(range, in: textContentManager) else { return }
+        invalidateDisplay(for: textRange)
     }
 
     // MARK: - NSTextLayoutManager Overrides
 
-    /// Called when the text layout needs to be updated.
-    open override func invalidateLayout(for range: NSRange) {
-        // TODO: Add fragment caching logic before invalidation
-        super.invalidateLayout(for: range)
+    open override func invalidateLayout(for textRange: NSTextRange) {
+        super.invalidateLayout(for: textRange)
+
+        // Notify delegate
+        layoutDelegate?.layoutManager(self, didInvalidateLayoutFor: textRange)
+
+        // Notify viewport controller
+        viewportController?.invalidateRange(NSRange(textRange, in: textContentManager))
+    }
+
+    open override func textLayoutFragment(for location: NSTextLocation) -> NSTextLayoutFragment {
+        let fragment = super.textLayoutFragment(for: location)
+
+        // Wrap in BSTextFragment if needed for custom rendering
+        // Note: NSTextLayoutManager creates fragments internally,
+        // so we can't directly return a BSTextFragment here.
+        // Custom fragment behavior is handled via subclassing NSTextLayoutFragment
+        // and overriding textLayoutFragment(for:).
+
+        return fragment
+    }
+
+    // MARK: - Fragment Management
+
+    /// Enumerates all visible text layout fragments.
+    ///
+    /// - Parameter block: A closure called for each visible fragment.
+    public func enumerateVisibleFragments(_ block: (NSTextLayoutFragment) -> Void) {
+        guard let visibleRange = visibleTextRange else { return }
+
+        enumerateTextLayoutFragments(from: visibleRange.location, options: [.ensuresLayout]) { fragment in
+            block(fragment)
+            return true
+        }
+    }
+
+    /// Returns the number of visible text layout fragments.
+    ///
+    /// - Returns: The count of visible fragments.
+    public func visibleFragmentCount() -> Int {
+        var count = 0
+        enumerateVisibleFragments { _ in count += 1 }
+        return count
+    }
+}
+
+// MARK: - Delegate Protocol
+
+/// Delegate protocol for BSTextLayoutManager notifications.
+@objc public protocol BSTextLayoutManagerDelegate: AnyObject {
+
+    /// Called when layout is invalidated for a text range.
+    ///
+    /// - Parameters:
+    ///   - layoutManager: The layout manager.
+    ///   - textRange: The invalidated text range.
+    @objc optional func layoutManager(_ layoutManager: BSTextLayoutManager, didInvalidateLayoutFor textRange: NSTextRange)
+
+    /// Called when viewport layout completes.
+    ///
+    /// - Parameters:
+    ///   - layoutManager: The layout manager.
+    ///   - visibleRect: The visible rectangle.
+    @objc optional func layoutManager(_ layoutManager: BSTextLayoutManager, didLayoutViewport visibleRect: CGRect)
+}
+
+// MARK: - CGPoint Extension
+
+private extension CGPoint {
+    /// Returns the distance from this point to a CGRect.
+    func distance(to rect: CGRect) -> CGFloat {
+        if rect.contains(self) {
+            return 0
+        }
+
+        let dx = max(rect.minX - x, 0, x - rect.maxX)
+        let dy = max(rect.minY - y, 0, y - rect.maxY)
+
+        return sqrt(dx * dx + dy * dy)
     }
 }

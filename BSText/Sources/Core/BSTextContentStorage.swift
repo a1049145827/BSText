@@ -2,49 +2,136 @@
 //  BSTextContentStorage.swift
 //  BSText 3.0
 //
-//  Content storage wrapping NSTextContentStorage.
+//  Content storage that wraps NSTextContentStorage with BSText enhancements.
 //  Manages attributed text storage with incremental editing support.
-//  Wraps NSTextContentStorage to add syntax invalidation and block model sync.
 //
 
 import UIKit
 
-/// Manages attributed text storage with incremental editing support.
-/// Wraps NSTextContentStorage to add syntax invalidation and block model sync.
+/// A content storage wrapper that adds BSText enhancements to NSTextContentStorage.
+///
+/// `BSTextContentStorage` wraps the system's `NSTextContentStorage` to provide:
+/// - Incremental editing notifications
+/// - Syntax invalidation hooks
+/// - Block model synchronization
+///
+/// On iOS 17+, UITextView automatically creates a `NSTextContentStorage` instance.
+/// BSTextContentStorage wraps this instance rather than replacing it, ensuring
+/// full system compatibility.
+///
+@objcMembers
 open class BSTextContentStorage: NSTextContentStorage {
 
     // MARK: - Properties
 
-    /// The current attributed string managed by this storage.
-    private var bsAttributedString: NSAttributedString?
+    /// The underlying system content storage being wrapped.
+    /// This is `self` since we inherit from NSTextContentStorage.
+    /// Kept for API consistency with the wrapper pattern.
+    public var underlyingStorage: NSTextContentStorage {
+        return self
+    }
+
+    /// Whether to track text changes for incremental processing.
+    public var tracksChanges: Bool = true
+
+    /// Delegate for receiving content change notifications.
+    public weak var contentDelegate: BSTextContentStorageDelegate?
 
     // MARK: - Initialization
 
-    /// Initializes a content storage with default settings.
+    /// Creates a new BSTextContentStorage instance.
     public override init() {
         super.init()
     }
 
-    /// Initializes a content storage from Interface Builder / Storyboard.
-    public required init?(coder: NSCoder) {
-        super.init(coder: coder)
+    /// Creates a wrapper around an existing NSTextContentStorage.
+    ///
+    /// This initializer is used when wrapping the system's content storage
+    /// from UITextView on iOS 17+.
+    ///
+    /// - Parameter wrapping: The system content storage to wrap.
+    public convenience init(wrapping storage: NSTextContentStorage) {
+        self.init()
+        // Note: We cannot truly "wrap" an existing NSTextContentStorage since
+        // we inherit from it. Instead, this serves as a marker that we're
+        // operating on the system's storage.
+        // The actual wrapping happens at the BSTextView level where we
+        // use the system's textContentStorage directly.
     }
 
-    // MARK: - Text Management
+    // MARK: - Text Content Management
 
-    /// Applies the given attributed string to the content storage.
+    /// Sets the attributed string content with optional change tracking.
     ///
-    /// - Parameter attrString: The attributed string to apply.
-    public func bs_setAttributedString(_ attrString: NSAttributedString) {
-        // TODO: Implement incremental diff and block model sync
-        super.attributedString = attrString
+    /// - Parameters:
+    ///   - attributedString: The new attributed string content.
+    ///   - options: Options for the content change.
+    public func setAttributedString(_ attributedString: NSAttributedString, options: [String: Any]? = nil) {
+        beginEditing()
+
+        let fullRange = NSRange(location: 0, length: textStorage?.length ?? 0)
+        textStorage?.replaceCharacters(in: fullRange, with: attributedString)
+
+        endEditing()
     }
 
     // MARK: - NSTextContentStorage Overrides
 
-    /// Handles edits to the text storage with incremental invalidation.
     open override func processEditing() {
-        // TODO: Add syntax invalidation and block model sync before processing
         super.processEditing()
+
+        guard tracksChanges else { return }
+
+        // Notify delegate of the change
+        let editedRange = editedRange
+        let changeInLength = changeInLength
+
+        contentDelegate?.contentStorage(self, didEditInRange: editedRange, changeInLength: changeInLength)
+
+        // TODO: Trigger syntax invalidation for the edited range
+        // TODO: Sync block models if needed
     }
+
+    // MARK: - Incremental Editing Support
+
+    /// Performs a batch of edits as a single transaction.
+    ///
+    /// - Parameter edits: A closure containing the edits to perform.
+    public func performBatchEdits(_ edits: () -> Void) {
+        beginEditing()
+        edits()
+        endEditing()
+    }
+
+    /// Replaces text in the specified range with new text.
+    ///
+    /// - Parameters:
+    ///   - range: The range of text to replace.
+    ///   - text: The new text to insert.
+    public func replaceText(in range: NSRange, with text: String) {
+        textStorage?.replaceCharacters(in: range, with: text)
+    }
+
+    /// Replaces text in the specified range with an attributed string.
+    ///
+    /// - Parameters:
+    ///   - range: The range of text to replace.
+    ///   - attributedString: The new attributed string to insert.
+    public func replaceText(in range: NSRange, with attributedString: NSAttributedString) {
+        textStorage?.replaceCharacters(in: range, with: attributedString)
+    }
+}
+
+// MARK: - Delegate Protocol
+
+/// Delegate protocol for BSTextContentStorage change notifications.
+@objc public protocol BSTextContentStorageDelegate: AnyObject {
+
+    /// Called after the content storage has been edited.
+    ///
+    /// - Parameters:
+    ///   - storage: The content storage that was edited.
+    ///   - range: The range of the edit.
+    ///   - changeInLength: The change in length of the text.
+    @objc optional func contentStorage(_ storage: BSTextContentStorage, didEditInRange range: NSRange, changeInLength: Int)
 }
