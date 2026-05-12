@@ -106,12 +106,31 @@ open class BSTextViewportController: NSObject {
               let contentManager = layoutManager.textContentManager else { return }
 
         // Find the text range for the visible rect
-        // Get the character range from the layout manager
-        let startCharacterRange = layoutManager.characterRange(for: rect)
+        // Use the document range and enumerate fragments to find visible range
+        var startLocation: NSTextLocation?
+        var endLocation: NSTextLocation?
         
-        if let startLocation = contentManager.location(contentManager.documentRange.location, offsetBy: startCharacterRange.location),
-           let endLocation = contentManager.location(contentManager.documentRange.location, offsetBy: startCharacterRange.location + startCharacterRange.length) {
-            visibleTextRange = NSTextRange(location: startLocation, end: endLocation)
+        layoutManager.enumerateTextLayoutFragments(from: contentManager.documentRange.location, options: [.ensuresLayout]) { fragment in
+            let fragmentFrame = fragment.layoutFragmentFrame
+            
+            // Check if this fragment intersects with the visible rect
+            if fragmentFrame.intersects(rect) {
+                if startLocation == nil {
+                    startLocation = fragment.rangeInElement.location
+                }
+                endLocation = fragment.rangeInElement.endLocation
+            }
+            
+            // Continue until we've passed the visible rect
+            if fragmentFrame.minY > rect.maxY {
+                return false
+            }
+            
+            return true
+        }
+        
+        if let start = startLocation, let end = endLocation {
+            visibleTextRange = NSTextRange(location: start, end: end)
         }
     }
 
@@ -133,26 +152,25 @@ open class BSTextViewportController: NSObject {
         guard enabled else { return }
 
         // Check if the invalidated range intersects with visible range
-        if let visibleRange = visibleTextRange,
-           let layoutManager = layoutManager,
-           let contentManager = layoutManager.textContentManager {
+        guard let visibleRange = visibleTextRange,
+              let layoutManager = layoutManager,
+              let contentManager = layoutManager.textContentManager else { return }
             
-            // Convert NSRange to NSTextRange for comparison
-            let startOffset = range.location
-            let endOffset = range.location + range.length
-            
-            guard let startLocation = contentManager.location(contentManager.documentRange.location, offsetBy: startOffset),
-                  let endLocation = contentManager.location(contentManager.documentRange.location, offsetBy: endOffset) else {
-                return
-            }
-            
-            let invalidatedRange = NSTextRange(location: startLocation, end: endLocation)
-            
-            // Check if ranges intersect
-            if rangesIntersect(invalidatedRange, visibleRange) {
-                // Re-layout visible area
-                layoutManager.layoutViewport(visibleRect)
-            }
+        // Convert NSRange to NSTextRange for comparison
+        let startOffset = range.location
+        let endOffset = range.location + range.length
+        
+        guard let startLocation = contentManager.location(contentManager.documentRange.location, offsetBy: startOffset),
+              let endLocation = contentManager.location(contentManager.documentRange.location, offsetBy: endOffset) else {
+            return
+        }
+        
+        let invalidatedRange = NSTextRange(location: startLocation, end: endLocation)
+        
+        // Check if ranges intersect
+        if rangesIntersect(invalidatedRange, visibleRange) {
+            // Re-layout visible area
+            layoutManager.layoutViewport(visibleRect)
         }
     }
 
