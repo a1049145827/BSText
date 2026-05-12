@@ -423,7 +423,7 @@ import UIKit
         let trans: CGAffineTransform = TextUtilities.textCGAffineTransformGet(from: hostView, to: self)
         let rotation: CGFloat = TextUtilities.textCGAffineTransformGetRotation((trans))
         if mag.captureDisabled {
-            if mag.snapshot == nil || mag.snapshot!.size.width > 1 {
+            if mag.snapshot == nil || mag.snapshot?.size.width ?? 0 > 1 {
                 
                 TextEffectWindow.placeholderRect = mag.bounds
                 
@@ -474,7 +474,7 @@ import UIKit
             }
         }
         
-        if mag.snapshot!.size.width == 1 {
+        if mag.snapshot?.size.width == 1 {
             mag.captureFadeAnimation = true
         }
         mag.snapshot = image
