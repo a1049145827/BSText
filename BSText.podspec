@@ -8,7 +8,7 @@ Pod::Spec.new do |spec|
   spec.social_media_url = 'https://a1049145827.github.io'
   spec.source       = { :git => 'https://github.com/a1049145827/BSText.git', :tag => spec.version.to_s }
   spec.platforms    = { :ios => '17.0' }
-  spec.source_files = 'BSText/Sources/**/*.{swift,h,m}'
+  spec.source_files = 'BSText/Sources/**/*.swift'
   spec.resource_bundles = {}
   spec.frameworks   = 'UIKit'
   spec.swift_version = '5.0'
