@@ -41,13 +41,9 @@ open class BSTextAttachment: NSTextAttachment {
     }
 
     public convenience init(type: BSTextAttachmentType, size: CGSize) {
-        self.init()
+        self.init(data: nil, ofType: nil)
         self.attachmentType = type
         self.displaySize = size
-    }
-    
-    public override init() {
-        super.init()
     }
 
     /// Load the attachment content asynchronously.
