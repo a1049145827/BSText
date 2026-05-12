@@ -43,8 +43,8 @@ import UIKit
 /// NSTextContentStorage -> NSTextLayoutManager -> NSTextContainer
 ///         ↓                      ↓
 ///   BSTextContentStorage   BSTextLayoutManager
-///                                ↓
-///                       BSTextViewportController
+///                         ↓
+///               BSTextViewportController
 /// ```
 ///
 @objcMembers
@@ -52,11 +52,29 @@ open class BSTextView: UITextView {
 
     // MARK: - TextKit 2 Components
 
+    /// The content storage that manages the attributed text content.
+    /// Wraps the system's `textContentStorage` with BSText enhancements.
+    public var bsContentStorage: BSTextContentStorage? {
+        return _contentStorage
+    }
+
+    /// The layout manager responsible for laying out text fragments.
+    /// Wraps the system's `textLayoutManager` with BSText enhancements.
+    public var bsLayoutManager: BSTextLayoutManager? {
+        return _layoutManager
+    }
+
     /// The viewport controller that manages visible fragment layout
     /// and viewport-based layout optimization.
     public let viewportController: BSTextViewportController
 
     // MARK: - Private Properties
+
+    /// Internal storage wrapper.
+    private var _contentStorage: BSTextContentStorage?
+
+    /// Internal layout manager wrapper.
+    private var _layoutManager: BSTextLayoutManager?
 
     /// Tracks whether custom TextKit 2 components have been configured.
     private var isBSTextConfigured: Bool = false
@@ -108,6 +126,10 @@ open class BSTextView: UITextView {
         guard !isBSTextConfigured else { return }
         isBSTextConfigured = true
 
+        // Note: Since we're inheriting from UITextView, it creates its own
+        // TextKit 2 components internally. We'll use those and wrap them
+        // with our viewport controller and delegate methods.
+        
         // Configure text container
         textContainer.widthTracksTextView = true
         textContainer.heightTracksTextView = false
@@ -128,6 +150,54 @@ open class BSTextView: UITextView {
             )
             viewportController.updateViewport(visibleRect)
         }
+    }
+
+    // MARK: - Drawing
+
+    open override func draw(_ rect: CGRect) {
+        super.draw(rect)
+
+        // Draw debug overlays if enabled
+        if debugOptions.contains(.showFragments) {
+            drawDebugFragments(in: rect)
+        }
+    }
+
+    /// Draw debug overlay for fragments.
+    private func drawDebugFragments(in rect: CGRect) {
+        guard let context = UIGraphicsGetCurrentContext() else { return }
+
+        context.saveGState()
+
+        // Draw fragment bounds using system's layout manager if available
+        if let layoutManager = self.textLayoutManager {
+            layoutManager.enumerateTextLayoutFragments(
+                from: layoutManager.documentRange.location,
+                options: []
+            ) { fragment in
+                let fragmentFrame = fragment.layoutFragmentFrame
+                
+                // Only draw if the fragment intersects the current rect
+                guard fragmentFrame.intersects(rect) else { return true }
+
+                // Draw fragment border
+                UIColor.systemBlue.setStroke()
+                context.setLineWidth(1)
+                context.stroke(fragmentFrame)
+
+                // Draw fragment label
+                let labelText = "Fragment (\(Int(fragmentFrame.origin.x)), \(Int(fragmentFrame.origin.y)), \(Int(fragmentFrame.size.width)), \(Int(fragmentFrame.size.height)))"
+                let attributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont.systemFont(ofSize: 8),
+                    .foregroundColor: UIColor.systemBlue
+                ]
+                labelText.draw(at: CGPoint(x: fragmentFrame.minX + 2, y: fragmentFrame.minY + 2), withAttributes: attributes)
+
+                return true
+            }
+        }
+
+        context.restoreGState()
     }
 
     // MARK: - Text Access
@@ -224,3 +294,4 @@ open class BSTextView: UITextView {
         }
     }
 }
+
