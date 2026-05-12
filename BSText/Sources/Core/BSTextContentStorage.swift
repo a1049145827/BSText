@@ -113,7 +113,7 @@ open class BSTextContentStorage: NSTextContentStorage {
     /// - Parameters:
     ///   - range: The range of text to replace.
     ///   - text: The new text to insert.
-    public func replaceCharacters(in range: NSRange, with text: String) {
+    public func replaceText(in range: NSRange, with text: String) {
         textStorage?.replaceCharacters(in: range, with: text)
     }
 
@@ -122,7 +122,7 @@ open class BSTextContentStorage: NSTextContentStorage {
     /// - Parameters:
     ///   - range: The range of text to replace.
     ///   - attributedString: The new attributed string to insert.
-    public func replaceCharacters(in range: NSRange, with attributedString: NSAttributedString) {
+    public func replaceAttributedText(in range: NSRange, with attributedString: NSAttributedString) {
         textStorage?.replaceCharacters(in: range, with: attributedString)
     }
 }

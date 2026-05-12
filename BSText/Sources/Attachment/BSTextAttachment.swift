@@ -36,10 +36,6 @@ open class BSTextAttachment: NSTextAttachment {
         case failed = 3
     }
 
-    public override init() {
-        super.init()
-    }
-
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
     }

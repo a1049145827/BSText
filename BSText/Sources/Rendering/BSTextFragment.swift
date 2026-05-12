@@ -18,10 +18,6 @@ open class BSTextFragment: NSTextLayoutFragment {
     /// Decoration renderers attached to this fragment.
     public var decorations: [BSTextDecoration] = []
 
-    public override init(textElement: NSTextElement, range: NSRange) {
-        super.init(textElement: textElement, range: range)
-    }
-
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
