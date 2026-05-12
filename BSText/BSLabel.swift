@@ -436,14 +436,16 @@ open class BSLabel: UIView, TextDebugTarget, TextAsyncLayerDelegate, NSSecureCod
             shrinkInnerLayout = nil
             
             if ignoreCommonProperties {
-                innerText = newValue!.text as? NSMutableAttributedString ?? NSMutableAttributedString()
-                innerContainer = newValue!.container.copy() as! TextContainer
+                innerText = newValue?.text as? NSMutableAttributedString ?? NSMutableAttributedString()
+                if let container = newValue?.container.copy() as? TextContainer {
+                    innerContainer = container
+                }
             } else {
                 innerText = (newValue?.text != nil) ? NSMutableAttributedString(attributedString: newValue!.text!) : NSMutableAttributedString()
                 
                 _updateOuterTextProperties()
                 
-                if let t = newValue?.container.copy() as! TextContainer? {
+                if let t = newValue?.container.copy() as? TextContainer {
                     innerContainer = t
                 } else {
                     innerContainer = TextContainer()
@@ -856,7 +858,9 @@ open class BSLabel: UIView, TextDebugTarget, TextAsyncLayerDelegate, NSSecureCod
             return nil
         }
         
-        let container = layout.container.copy() as! TextContainer
+        guard let container = layout.container.copy() as? TextContainer else {
+            return nil
+        }
         container.maximumNumberOfRows = 1
         var containerSize = container.size
         if container.isVerticalForm == false {
@@ -1418,11 +1422,15 @@ open class BSLabel: UIView, TextDebugTarget, TextAsyncLayerDelegate, NSSecureCod
     
     override open var intrinsicContentSize: CGSize {
         if preferredMaxLayoutWidth == 0 {
-            let container = innerContainer.copy() as! TextContainer
+            guard let container = innerContainer.copy() as? TextContainer else {
+                return CGSize.zero
+            }
             container.size = TextContainer.textContainerMaxSize
             
-            let layout = TextLayout(container: container, text: innerText)
-            return layout!.textBoundingSize
+            guard let layout = TextLayout(container: container, text: innerText) else {
+                return CGSize.zero
+            }
+            return layout.textBoundingSize
         }
         
         var containerSize: CGSize = innerContainer.size
@@ -1440,11 +1448,15 @@ open class BSLabel: UIView, TextDebugTarget, TextAsyncLayerDelegate, NSSecureCod
             }
         }
         
-        let container = innerContainer.copy() as! TextContainer
+        guard let container = innerContainer.copy() as? TextContainer else {
+            return CGSize.zero
+        }
         container.size = containerSize
         
-        let layout = TextLayout(container: container, text: innerText)
-        return layout!.textBoundingSize
+        guard let layout = TextLayout(container: container, text: innerText) else {
+            return CGSize.zero
+        }
+        return layout.textBoundingSize
     }
     
     // MARK: - TextAsyncLayerDelegate

@@ -1140,11 +1140,15 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         _placeHolderView.image = nil
         _placeHolderView.frame = frame
         if (placeholderAttributedText?.length ?? 0) > 0 {
-            let container = _innerContainer.copy() as! TextContainer
+            guard let container = _innerContainer.copy() as? TextContainer else {
+                return
+            }
             container.size = bounds.size
             container.truncationType = TextTruncationType.end
             container.truncationToken = nil
-            let layout = TextLayout(container: container, text: placeholderAttributedText)!
+            guard let layout = TextLayout(container: container, text: placeholderAttributedText) else {
+                return
+            }
             let size: CGSize = layout.textBoundingSize
             let needDraw: Bool = size.width > 1 && size.height > 1
             if needDraw {
