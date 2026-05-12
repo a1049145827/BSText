@@ -33,6 +33,10 @@ let package = Package(
                 .linkedFramework("CoreText"),
                 .linkedFramework("CoreGraphics"),
                 .linkedFramework("UIKit")
-            ])
+            ]),
+        .testTarget(
+            name: "BSTextTests",
+            dependencies: ["BSText"],
+            path: "Framework/BSTextTests")
     ]
 )
