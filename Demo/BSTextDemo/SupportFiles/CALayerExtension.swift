@@ -13,15 +13,14 @@ extension CALayer {
     /**
      Take snapshot without transform, image's size equals to bounds.
      */
-    func snapshotImage() -> UIImage {
-        UIGraphicsBeginImageContextWithOptions(bounds.size, _: isOpaque, _: 0)
-        let context = UIGraphicsGetCurrentContext()
-        if let context = context {
-            render(in: context)
+    func snapshotImage() -> UIImage? {
+        let format = UIGraphicsImageRendererFormat()
+        format.opaque = isOpaque
+        format.scale = 0 // Use device scale
+        let renderer = UIGraphicsImageRenderer(size: bounds.size, format: format)
+        return renderer.image { context in
+            render(in: context.cgContext)
         }
-        let image: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return image!
     }
     
     /**
