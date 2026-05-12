@@ -986,6 +986,62 @@ open class BSLabel: UIView, TextDebugTarget, TextAsyncLayerDelegate, NSSecureCod
         _removeHighlight(animated: true)
         state.trackingTouch = false
     }
+
+    static func _shouldInvokeHighlightTap(wasTouchCancelled: Bool, touchMoved: Bool, touchStillInsideHighlight: Bool) -> Bool {
+        if wasTouchCancelled {
+            return false
+        }
+        return !touchMoved || touchStillInsideHighlight
+    }
+
+    private func _endTrackedTouch(_ touch: UITouch?, wasTouchCancelled: Bool) {
+        guard state.trackingTouch else { return }
+
+        _endLongPressTimer()
+
+        if !state.touchMoved && (textTapAction != nil) {
+            var range = NSRange(location: NSNotFound, length: 0)
+            var rect = CGRect.null
+            let point: CGPoint = _convertPoint(toLayout: touchBeganPoint)
+            let textRange: TextRange? = innerLayout?.textRange(at: point)
+            var textRect: CGRect = innerLayout!.rect(for: textRange)
+            textRect = _convertRect(fromLayout: textRect)
+            if textRange != nil {
+                if let aRange = textRange?.asRange {
+                    range = aRange
+                }
+                rect = textRect
+            }
+            textTapAction?(self, innerText, range, rect)
+        }
+
+        if highlight != nil {
+            let touchStillInsideHighlight: Bool
+            if let touch = touch {
+                touchStillInsideHighlight = _getHighlight(at: touch.location(in: self), range: nil) == highlight
+            } else {
+                touchStillInsideHighlight = false
+            }
+
+            if BSLabel._shouldInvokeHighlightTap(
+                wasTouchCancelled: wasTouchCancelled,
+                touchMoved: state.touchMoved,
+                touchStillInsideHighlight: touchStillInsideHighlight
+            ) {
+                if let tapAction = highlight?.tapAction != nil ? highlight!.tapAction : highlightTapAction {
+                    let start = TextPosition.position(with: highlightRange.location)
+                    let end = TextPosition.position(with: highlightRange.location + highlightRange.length, affinity: .backward)
+                    let range = TextRange.range(with: start, end: end)
+                    var rect: CGRect = innerLayout!.rect(for: range)
+                    rect = _convertRect(fromLayout: rect)
+                    tapAction(self, innerText, highlightRange, rect)
+                }
+            }
+            _removeHighlight(animated: fadeOnHighlight)
+        }
+
+        state.trackingTouch = false
+    }
     
     private func _convertPoint(toLayout point: CGPoint) -> CGPoint {
         var point = point
@@ -1128,7 +1184,7 @@ open class BSLabel: UIView, TextDebugTarget, TextAsyncLayerDelegate, NSSecureCod
     
     private func _initLabel() {
         (layer as? TextAsyncLayer)?.displaysAsynchronously = false
-        layer.contentsScale = UIScreen.main.scale
+        layer.contentsScale = TextUtilities.textScreenScale
         contentMode = .redraw
         
         TextDebugOption.add(self)
@@ -1217,7 +1273,7 @@ open class BSLabel: UIView, TextDebugTarget, TextAsyncLayerDelegate, NSSecureCod
             let layout: TextLayout? = innerLayout
             var contains = false
             if layout?.container.maximumNumberOfRows == 0 {
-                if layout?.truncatedLine == nil {
+                if layout?.needTruncation == false {
                     contains = true
                 }
             } else {
@@ -1344,41 +1400,7 @@ open class BSLabel: UIView, TextDebugTarget, TextAsyncLayerDelegate, NSSecureCod
     }
     
     open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let touch = touches.first!
-        let point = touch.location(in: self)
-        
-        if state.trackingTouch {
-            _endLongPressTimer()
-            if !state.touchMoved && (textTapAction != nil) {
-                var range = NSRange(location: NSNotFound, length: 0)
-                var rect = CGRect.null
-                let point: CGPoint = _convertPoint(toLayout: touchBeganPoint)
-                let textRange: TextRange? = innerLayout?.textRange(at: point)
-                var textRect: CGRect = innerLayout!.rect(for: textRange)
-                textRect = _convertRect(fromLayout: textRect)
-                if textRange != nil {
-                    if let aRange = textRange?.asRange {
-                        range = aRange
-                    }
-                    rect = textRect
-                }
-                textTapAction?(self, innerText, range, rect)
-            }
-            
-            if (highlight != nil) {
-                if !state.touchMoved || _getHighlight(at: point, range: nil) == highlight {
-                    if let tapAction = highlight?.tapAction != nil ? highlight!.tapAction : highlightTapAction {
-                        let start = TextPosition.position(with: highlightRange.location)
-                        let end = TextPosition.position(with: highlightRange.location + highlightRange.length, affinity: .backward)
-                        let range = TextRange.range(with: start, end: end)
-                        var rect: CGRect = innerLayout!.rect(for: range)
-                        rect = _convertRect(fromLayout: rect)
-                        tapAction(self, innerText, highlightRange, rect)
-                    }
-                }
-                _removeHighlight(animated: fadeOnHighlight)
-            }
-        }
+        _endTrackedTouch(touches.first, wasTouchCancelled: false)
         
         if !state.swallowTouch {
             super.touchesEnded(touches, with: event)
@@ -1386,7 +1408,7 @@ open class BSLabel: UIView, TextDebugTarget, TextAsyncLayerDelegate, NSSecureCod
     }
     
     open override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        _endTouch()
+        _endTrackedTouch(touches.first, wasTouchCancelled: true)
         if !state.swallowTouch {
             super.touchesCancelled(touches, with: event)
         }

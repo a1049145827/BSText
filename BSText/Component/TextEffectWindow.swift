@@ -211,11 +211,8 @@ import UIKit
     // Bring self to front
     func _updateWindowLevel() {
         
-        guard let app = TextUtilities.sharedApplication else {
-            return
-        }
-        var top = app.windows.last
-        let key = app.keyWindow
+        var top = TextUtilities.windowsForScenes.last
+        let key = TextUtilities.keyWindowForScene
         if let aLevel = key?.windowLevel, let aLevel1 = top?.windowLevel {
             if key != nil && aLevel > aLevel1 {
                 top = key
@@ -392,14 +389,14 @@ import UIKit
     private static var placeholder: UIImage = {
         
         placeholderRect.origin = CGPoint.zero
-        UIGraphicsBeginImageContextWithOptions(placeholderRect.size, false, 0)
-        let context = UIGraphicsGetCurrentContext()
-        UIColor(white: 1, alpha: 0.8).set()
-        context?.fill(placeholderRect)
-        let img = UIGraphicsGetImageFromCurrentImageContext() ?? UIImage()
-        UIGraphicsEndImageContext()
-        
-        return img
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 0
+        format.opaque = false
+        let renderer = UIGraphicsImageRenderer(size: placeholderRect.size, format: format)
+        return renderer.image { rendererContext in
+            UIColor(white: 1, alpha: 0.8).set()
+            rendererContext.cgContext.fill(placeholderRect)
+        }
     }()
     
     /**
@@ -408,7 +405,8 @@ import UIKit
      */
     private func _update(magnifier mag: TextMagnifier) -> CGFloat {
         
-        guard let app = TextUtilities.sharedApplication else {
+        let windowsForScenes = TextUtilities.windowsForScenes
+        if windowsForScenes.isEmpty {
             return 0
         }
         let hostView: UIView? = mag.hostView
@@ -436,56 +434,45 @@ import UIKit
             return rotation
         }
 
-        UIGraphicsBeginImageContextWithOptions(captureRect.size, _: false, _: 0)
-        let context = UIGraphicsGetCurrentContext()
-        if context == nil {
-            return rotation
-        }
-        var tp = CGPoint(x: captureRect.size.width / 2, y: captureRect.size.height / 2)
-        tp = tp.applying(CGAffineTransform(rotationAngle: rotation))
-        context?.rotate(by: -rotation)
-        context?.translateBy(x: tp.x - captureCenter.x, y: tp.y - captureCenter.y)
-        var windows = app.windows
-        let keyWindow = app.keyWindow
-        if let aWindow = keyWindow {
-            if !windows.contains(aWindow) {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 0
+        format.opaque = false
+        let renderer = UIGraphicsImageRenderer(size: captureRect.size, format: format)
+        let image = renderer.image { rendererContext in
+            let context = rendererContext.cgContext
+            var tp = CGPoint(x: captureRect.size.width / 2, y: captureRect.size.height / 2)
+            tp = tp.applying(CGAffineTransform(rotationAngle: rotation))
+            context.rotate(by: -rotation)
+            context.translateBy(x: tp.x - captureCenter.x, y: tp.y - captureCenter.y)
+            var windows = windowsForScenes
+            let keyWindow = TextUtilities.keyWindowForScene
+            if let aWindow = keyWindow, !windows.contains(aWindow) {
                 windows.append(aWindow)
             }
+            windows = windows.sorted {
+                if $0.windowLevel == $1.windowLevel {
+                    return false
+                }
+                return $0.windowLevel.rawValue < $1.windowLevel.rawValue
+            }
+
+            let mainScreen = hostWindow?.windowScene?.screen
+            for window in windows {
+                if window.isHidden || window.alpha <= 0.01 {
+                    continue
+                }
+                if mainScreen != nil && window.screen != mainScreen {
+                    continue
+                }
+                if window.isKind(of: type(of: self)) {
+                    break // don't capture window above self
+                }
+                context.saveGState()
+                context.concatenate(TextUtilities.textCGAffineTransformGet(from: window, to: self))
+                window.layer.render(in: context)
+                context.restoreGState()
+            }
         }
-        windows = (windows as NSArray).sortedArray(comparator: { w1, w2 in
-            let aLevel = (w1 as! UIWindow).windowLevel
-            let aLevel1 = (w2 as! UIWindow).windowLevel
-            
-            if aLevel < aLevel1 {
-                return .orderedAscending
-            } else if aLevel > aLevel {
-                return .orderedDescending
-            }
-            
-            return .orderedSame
-        }) as? [UIWindow] ?? windows
-        
-        let mainScreen = UIScreen.main
-        for window in windows {
-            if window.isHidden || window.alpha <= 0.01 {
-                continue
-            }
-            if window.screen != mainScreen {
-                continue
-            }
-            if (window.isKind(of: type(of: self))) {
-                break //don't capture window above self
-            }
-            context?.saveGState()
-            context?.concatenate(TextUtilities.textCGAffineTransformGet(from: window, to: self))
-            if let aContext = context {
-                window.layer.render(in: aContext)
-            } //render
-            //[window drawViewHierarchyInRect:window.bounds afterScreenUpdates:NO]; //slower when capture whole window
-            context?.restoreGState()
-        }
-        let image: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
         
         if mag.snapshot!.size.width == 1 {
             mag.captureFadeAnimation = true

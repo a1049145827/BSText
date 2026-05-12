@@ -96,7 +96,7 @@ fileprivate class TextViewUndoObject: NSObject {
  See NSAttributedStringExtension.swift for more convenience methods to set the attributes.
  See TextAttribute.swift and TextLayout.swift for more information.
  */
-open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollViewDelegate, UIAlertViewDelegate, TextDebugTarget, TextKeyboardObserver, NSSecureCoding {
+open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollViewDelegate, TextDebugTarget, TextKeyboardObserver, NSSecureCoding {
     
     public lazy var tokenizer: UITextInputTokenizer = UITextInputStringTokenizer(textInput: UITextView())
     public var markedTextRange: UITextRange?
@@ -1148,15 +1148,17 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             let size: CGSize = layout.textBoundingSize
             let needDraw: Bool = size.width > 1 && size.height > 1
             if needDraw {
-                UIGraphicsBeginImageContextWithOptions(size, _: false, _: 0)
-                let context = UIGraphicsGetCurrentContext()
-                layout.draw(in: context, size: size, debug: debugOption)
-                let image: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
-                UIGraphicsEndImageContext()
+                let format = UIGraphicsImageRendererFormat()
+                format.scale = 0
+                format.opaque = false
+                let renderer = UIGraphicsImageRenderer(size: size, format: format)
+                let image = renderer.image { rendererContext in
+                    layout.draw(in: rendererContext.cgContext, size: size, debug: debugOption)
+                }
                 _placeHolderView.image = image
-                frame.size = image?.size ?? CGSize.zero
+                frame.size = image.size
                 if container.isVerticalForm {
-                    frame.origin.x = bounds.size.width - (image?.size.width ?? 0)
+                    frame.origin.x = bounds.size.width - image.size.width
                 } else {
                     frame.origin = CGPoint.zero
                 }
@@ -2482,12 +2484,11 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     /// Returns the `root` view controller (returns nil if not found).
     private func _getRootViewController() -> UIViewController? {
         var ctrl: UIViewController? = nil
-        let app: UIApplication? = TextUtilities.sharedApplication
         if ctrl == nil {
-            ctrl = app?.keyWindow?.rootViewController
+            ctrl = TextUtilities.keyWindowForScene?.rootViewController
         }
         if ctrl == nil {
-            ctrl = app?.windows.first?.rootViewController
+            ctrl = TextUtilities.windowsForScenes.first?.rootViewController
         }
         if ctrl == nil {
             ctrl = bs_viewController
@@ -2617,9 +2618,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     
     /// Show undo alert if it can undo or redo.
     private func _showUndoRedoAlert() {
-        #if TARGET_OS_IOS
         state.firstResponderBeforeUndoAlert = isFirstResponder
-        weak var _self = self
         let strings = _localizedUndoStrings()
         let canUndo = _canUndo()
         let canRedo = _canRedo()
@@ -2628,42 +2627,41 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         
         if canUndo && canRedo {
             
-            let alert = UIAlertController(title: strings[4] as? String, message: "", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: strings[3] as? String, style: .default, handler: { action in
-                _self._undo()
-                _self._restoreFirstResponderAfterUndoAlert()
+            let alert = UIAlertController(title: strings[4], message: "", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: strings[3], style: .default, handler: { [weak self] action in
+                self?._undo()
+                self?._restoreFirstResponderAfterUndoAlert()
             }))
-            alert.addAction(UIAlertAction(title: strings[2] as? String, style: .default, handler: { action in
-                _self._redo()
-                _self._restoreFirstResponderAfterUndoAlert()
+            alert.addAction(UIAlertAction(title: strings[2], style: .default, handler: { [weak self] action in
+                self?._redo()
+                self?._restoreFirstResponderAfterUndoAlert()
             }))
-            alert.addAction(UIAlertAction(title: strings[0] as? String, style: .cancel, handler: { action in
-                _self._restoreFirstResponderAfterUndoAlert()
+            alert.addAction(UIAlertAction(title: strings[0], style: .cancel, handler: { [weak self] action in
+                self?._restoreFirstResponderAfterUndoAlert()
             }))
             ctrl?.present(alert, animated: true)
         } else if canUndo {
             
-            let alert = UIAlertController(title: strings[4] as? String, message: "", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: strings[3] as? String, style: .default, handler: { action in
-                _self._undo()
-                _self._restoreFirstResponderAfterUndoAlert()
+            let alert = UIAlertController(title: strings[4], message: "", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: strings[3], style: .default, handler: { [weak self] action in
+                self?._undo()
+                self?._restoreFirstResponderAfterUndoAlert()
             }))
-            alert.addAction(UIAlertAction(title: strings[0] as? String, style: .cancel, handler: { action in
-                _self._restoreFirstResponderAfterUndoAlert()
+            alert.addAction(UIAlertAction(title: strings[0], style: .cancel, handler: { [weak self] action in
+                self?._restoreFirstResponderAfterUndoAlert()
             }))
             ctrl?.present(alert, animated: true)
         } else if canRedo {
-            var alert = UIAlertController(title: strings[2], message: "", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: strings[1], style: .default, handler: { action in
-                self._redo()
-                self._restoreFirstResponderAfterUndoAlert()
+            let alert = UIAlertController(title: strings[2], message: "", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: strings[1], style: .default, handler: { [weak self] action in
+                self?._redo()
+                self?._restoreFirstResponderAfterUndoAlert()
             }))
-            alert.addAction(UIAlertAction(title: strings[0], style: .cancel, handler: { action in
-                self._restoreFirstResponderAfterUndoAlert()
+            alert.addAction(UIAlertAction(title: strings[0], style: .cancel, handler: { [weak self] action in
+                self?._restoreFirstResponderAfterUndoAlert()
             }))
-            ctrl.present(alert, animated: true)
+            ctrl?.present(alert, animated: true)
         }
-        #endif
     }
     
     static let localizedUndoStringsDic =
@@ -3544,7 +3542,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             var img: UIImage? = nil
             
             #if canImport(YYImage)
-            let scale: CGFloat = UIScreen.main.scale
+            let scale: CGFloat = TextUtilities.textScreenScale
             if let d = p.bs_GIFData {
                 img = YYImage(data: d, scale: scale)
             }
@@ -3787,21 +3785,6 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     
     public func keyboardChanged(with transition: TextKeyboardTransition) {
         _keyboardChanged()
-    }
-    
-    // MARK: - @protocol UIALertViewDelegate
-    public func alertView(_ alertView: UIAlertView, clickedButtonAt buttonIndex: Int) {
-        let title = alertView.buttonTitle(at: buttonIndex)
-        if (title?.length ?? 0) == 0 {
-            return
-        }
-        let strings = _localizedUndoStrings()
-        if (title == strings[1]) || (title == strings[2]) {
-            _redo()
-        } else if (title == strings[3]) || (title == strings[4]) {
-            _undo()
-        }
-        _restoreFirstResponderAfterUndoAlert()
     }
     
     // MARK: - @protocol UIKeyInput

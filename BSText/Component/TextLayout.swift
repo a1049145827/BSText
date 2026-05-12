@@ -542,6 +542,8 @@ public class TextLayout: NSObject, NSCoding, NSCopying {
     @objc public private(set) var needDrawStrikethrough = false
     ///< Has border attribute
     @objc public private(set) var needDrawBorder = false
+    ///< Whether the text does not fit in the container.
+    @objc public private(set) var needTruncation = false
     
     private var lineRowsIndex: UnsafeMutablePointer<Int>?
     ///< top-left origin
@@ -1078,6 +1080,8 @@ public class TextLayout: NSObject, NSCoding, NSCopying {
                 lineBlock(truncatedLine_)
             }
         }
+
+        self.needTruncation = needTruncation
         
         if visibleRange_.length > 0 {
             self.needDrawText = true

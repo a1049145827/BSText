@@ -29,6 +29,36 @@ public class TextUtilities: NSObject {
         
         return TextUtilities.isAppExtension ? nil : UIApplication.shared
     }
+
+    @objc public static var keyWindowForScene: UIWindow? {
+        guard let app = TextUtilities.sharedApplication else {
+            return nil
+        }
+        for scene in app.connectedScenes {
+            guard scene.activationState == .foregroundActive, let windowScene = scene as? UIWindowScene else {
+                continue
+            }
+            if let window = windowScene.windows.first(where: { $0.isKeyWindow }) {
+                return window
+            }
+        }
+        for scene in app.connectedScenes {
+            guard let windowScene = scene as? UIWindowScene else {
+                continue
+            }
+            if let window = windowScene.windows.first(where: { $0.isKeyWindow }) {
+                return window
+            }
+        }
+        return nil
+    }
+
+    @objc public static var windowsForScenes: [UIWindow] {
+        guard let app = TextUtilities.sharedApplication else {
+            return []
+        }
+        return app.connectedScenes.compactMap { $0 as? UIWindowScene }.flatMap { $0.windows }
+    }
     
     public static func numberSwap<T>(_ a: inout T, b: inout T) {
         (a, b) = (b, a)
@@ -622,10 +652,19 @@ public class TextUtilities: NSObject {
     }
     
     /// Get main screen's scale.
-    @objc public static var textScreenScale = UIScreen.main.scale
+    @objc public static var textScreenScale: CGFloat {
+        let scale = UITraitCollection.current.displayScale
+        if scale > 0 {
+            return scale
+        }
+        return TextUtilities.keyWindowForScene?.screen.scale ?? 1
+    }
     
     /// Get main screen's size. Height is always larger than width.
-    @objc public static var textScreenSize = CGSize(width: min(UIScreen.main.bounds.size.height, UIScreen.main.bounds.size.width), height: max(UIScreen.main.bounds.size.height, UIScreen.main.bounds.size.width))
+    @objc public static var textScreenSize: CGSize {
+        let screenSize = TextUtilities.keyWindowForScene?.windowScene?.screen.bounds.size ?? CGSize(width: 375, height: 812)
+        return CGSize(width: min(screenSize.height, screenSize.width), height: max(screenSize.height, screenSize.width))
+    }
     
     /// Convert point to pixel.
     @objc(textCGFloatToPixel:)

@@ -129,22 +129,18 @@ public class TextKeyboardManager: NSObject {
     /// Get the keyboard window. nil if there's no keyboard window.
     @objc public var keyboardWindow: UIWindow? {
         
-        guard let app = TextUtilities.sharedApplication else {
-            return nil
-        }
-        
-        for window in app.windows {
+        for window in TextUtilities.windowsForScenes {
             if (_getKeyboardView(from: window) != nil) {
                 return window
             }
         }
         
-        let window: UIWindow? = app.keyWindow
+        let window: UIWindow? = TextUtilities.keyWindowForScene
         if (_getKeyboardView(from: window) != nil) {
             return window
         }
         var kbWindows = [UIWindow]()
-        for window in app.windows {
+        for window in TextUtilities.windowsForScenes {
             let windowName = NSStringFromClass(type(of: window))
             if _systemVersion < 9 {
                 // UITextEffectsWindow
@@ -169,19 +165,19 @@ public class TextKeyboardManager: NSObject {
     /// Get the keyboard view. nil if there's no keyboard view.
     @objc public var keyboardView: UIView? {
         
-        let app: UIApplication? = TextUtilities.sharedApplication
-        if app == nil {
+        let windows = TextUtilities.windowsForScenes
+        if windows.isEmpty {
             return nil
         }
         var window: UIWindow? = nil
         var view: UIView? = nil
-        for window in app?.windows ?? [] {
+        for window in windows {
             view = _getKeyboardView(from: window)
             if view != nil {
                 return view
             }
         }
-        window = app?.keyWindow
+        window = TextUtilities.keyWindowForScene
         view = _getKeyboardView(from: window)
         if view != nil {
             return view
@@ -460,16 +456,13 @@ public class TextKeyboardManager: NSObject {
     
     @objc private func _notifyAllObservers() {
         
-        guard let app = TextUtilities.sharedApplication else {
-            return
-        }
         let keyboard: UIView? = keyboardView
         var window: UIWindow? = keyboard?.window
         if window == nil {
-            window = app.keyWindow
+            window = TextUtilities.keyWindowForScene
         }
         if window == nil {
-            window = app.windows.first
+            window = TextUtilities.windowsForScenes.first
         }
         guard let w = window else {
             return
@@ -528,18 +521,15 @@ public class TextKeyboardManager: NSObject {
     public func convert(_ rect: CGRect, to view: UIView?) -> CGRect {
         var rect = rect
         
-        guard let app = TextUtilities.sharedApplication else {
-            return CGRect.zero
-        }
         if rect.isNull {
             return rect
         }
         if rect.isInfinite {
             return rect
         }
-        var mainWindow: UIWindow? = app.keyWindow
+        var mainWindow: UIWindow? = TextUtilities.keyWindowForScene
         if mainWindow == nil {
-            mainWindow = app.windows.first
+            mainWindow = TextUtilities.windowsForScenes.first
         }
         if mainWindow == nil {
             // no window ?!

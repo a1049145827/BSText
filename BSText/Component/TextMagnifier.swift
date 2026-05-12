@@ -149,12 +149,14 @@ fileprivate class TextMagnifierCaret: TextMagnifier {
         rect.size = size
         rect.origin = CGPoint.zero
         rect = rect.insetBy(dx: kPadding, dy: kPadding)
-        UIGraphicsBeginImageContextWithOptions(size, _: false, _: 0)
-        let context = UIGraphicsGetCurrentContext()!
-        
         let boxPath = CGPath(rect: CGRect(x: 0, y: 0, width: size.width, height: size.height), transform: nil)
         let fillPath = CGPath(ellipseIn: rect, transform: nil)
         let strokePath = CGPath(ellipseIn: TextUtilities.textCGRect(pixelHalf: rect), transform: nil)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 0
+        format.opaque = false
+        let renderedImage = UIGraphicsImageRenderer(size: size, format: format).image { rendererContext in
+        let context = rendererContext.cgContext
         // inner shadow
         context.saveGState()
         do {
@@ -203,8 +205,8 @@ fileprivate class TextMagnifierCaret: TextMagnifier {
             context.strokePath()
         }
         context.restoreGState()
-        image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
+        }
+        image = renderedImage
 
         return image
     }
@@ -290,8 +292,6 @@ fileprivate class TextMagnifierRanged: TextMagnifier {
         var rect = CGRect()
         rect.size = size
         rect.origin = CGPoint.zero
-        UIGraphicsBeginImageContextWithOptions(size, _: false, _: 0)
-        let context = UIGraphicsGetCurrentContext()!
         let boxPath = CGPath(rect: rect, transform: nil)
         let path = CGMutablePath()
         path.move(to: CGPoint(x: kPadding + kRadius, y: kPadding), transform: .identity)
@@ -312,6 +312,11 @@ fileprivate class TextMagnifierRanged: TextMagnifier {
         arrowPath.addLine(to: CGPoint(x: size.width / 2 + kArrow, y: TextUtilities.textCGFloat(pixelFloor: kPadding) + kHeight), transform: .identity)
         arrowPath.addLine(to: CGPoint(x: size.width / 2, y: kPadding + kHeight + kArrow), transform: .identity)
         arrowPath.closeSubpath()
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 0
+        format.opaque = false
+        let renderedImage = UIGraphicsImageRenderer(size: size, format: format).image { rendererContext in
+        let context = rendererContext.cgContext
         // inner shadow
         context.saveGState()
         do {
@@ -368,8 +373,8 @@ fileprivate class TextMagnifierRanged: TextMagnifier {
             context.strokePath()
         }
         context.restoreGState()
-        image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
+        }
+        image = renderedImage
         
         return image
     }
