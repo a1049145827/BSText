@@ -2914,7 +2914,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     
     // MARK: - Public
     
-    override init(frame: CGRect) {
+    public override init(frame: CGRect) {
         super.init(frame: frame)
         
         tokenizer = UITextInputStringTokenizer(textInput: self)
