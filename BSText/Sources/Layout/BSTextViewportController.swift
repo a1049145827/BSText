@@ -165,7 +165,7 @@ open class BSTextViewportController: NSObject {
             return
         }
         
-        let invalidatedRange = NSTextRange(location: startLocation, end: endLocation)
+        guard let invalidatedRange = NSTextRange(location: startLocation, end: endLocation) else { return }
         
         // Check if ranges intersect
         if rangesIntersect(invalidatedRange, visibleRange) {
