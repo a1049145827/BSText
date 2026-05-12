@@ -98,7 +98,7 @@ fileprivate class TextViewUndoObject: NSObject {
  */
 open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollViewDelegate, TextDebugTarget, TextKeyboardObserver, NSSecureCoding {
     
-    public lazy var tokenizer: UITextInputTokenizer = UITextInputStringTokenizer(textInput: UITextView())
+    public lazy var tokenizer: UITextInputTokenizer = UITextInputStringTokenizer(textInput: self)
     public var markedTextRange: UITextRange?
     
     @objc public static let textViewTextDidBeginEditingNotification = "TextViewTextDidBeginEditing"
@@ -3969,7 +3969,13 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         _inputDelegate?.selectionDidChange(self)
         _inputDelegate?.textDidChange(self)
         
-        _updateOuterProperties()
+        // During marked text input (e.g. Korean IME composition), skip
+        // _updateOuterProperties() to avoid triggering KVO on attributedText
+        // which may cause external observers to reset the text and break
+        // the composition state (ㅇㅏㄴ → 안).
+        if markedTextRange == nil {
+            _updateOuterProperties()
+        }
         _updateLayout()
         _updateSelectionView()
         _scrollRangeToVisible(_selectedTextRange)
@@ -3982,7 +3988,11 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     public func unmarkText() {
+        _inputDelegate?.textWillChange(self)
+        _inputDelegate?.selectionWillChange(self)
         markedTextRange = nil
+        _inputDelegate?.selectionDidChange(self)
+        _inputDelegate?.textDidChange(self)
         _endTouchTracking()
         _hideMenu()
         if _parseText() {
@@ -4141,7 +4151,10 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             return nil
         }
         
-        if newLocation != 0 && newLocation != _innerText.length {
+        // Skip composed character sequence extension during marked text input
+        // (e.g. Korean IME composing ㅇㅏㄴ → 안) to allow the input method
+        // to freely control cursor position within the composition.
+        if newLocation != 0 && newLocation != _innerText.length && markedTextRange == nil {
             // fix emoji
             _updateIfNeeded()
             let extendRange: TextRange? = _innerLayout?.textRange(byExtending: TextPosition(offset: newLocation))
