@@ -162,10 +162,11 @@ final class BSTextCachePerformanceTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        cache = BSTextCache()
+        cache = BSTextCache.shared
     }
     
     override func tearDown() {
+        cache.removeAll()
         cache = nil
         super.tearDown()
     }
@@ -173,19 +174,21 @@ final class BSTextCachePerformanceTests: XCTestCase {
     func testCacheWritePerformance() {
         measure {
             for (index, key) in testKeys.enumerated() {
-                cache.setObject("value\(index)" as AnyObject, forKey: key)
+                let image = UIImage()
+                cache.cacheImage(image, forKey: key, cost: 100)
             }
         }
     }
     
     func testCacheReadPerformance() {
         for (index, key) in testKeys.enumerated() {
-            cache.setObject("value\(index)" as AnyObject, forKey: key)
+            let image = UIImage()
+            cache.cacheImage(image, forKey: key, cost: 100)
         }
         
         measure {
             for key in testKeys {
-                _ = cache.object(forKey: key)
+                _ = cache.image(forKey: key)
             }
         }
     }

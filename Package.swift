@@ -15,7 +15,11 @@ let package = Package(
     targets: [
         .target(
             name: "BSText",
-            path: "BSText/Sources")
+            path: "BSText/Sources"),
+        .testTarget(
+            name: "BSTextTests",
+            dependencies: ["BSText"],
+            path: "BSTextTests")
     ],
     swiftLanguageVersions: [.v5]
 )

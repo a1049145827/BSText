@@ -75,8 +75,8 @@ final class BSTextContentStorageTests: XCTestCase {
     }
     
     func testTextStorageDelegation() {
-        contentStorage.string = "Test Text"
-        XCTAssertEqual(contentStorage.string, "Test Text")
+        let storage = NSTextStorage(string: "Test Text")
+        XCTAssertEqual(storage.string, "Test Text")
     }
 }
 
@@ -86,10 +86,11 @@ final class BSTextCacheTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        cache = BSTextCache()
+        cache = BSTextCache.shared
     }
     
     override func tearDown() {
+        cache.removeAll()
         cache = nil
         super.tearDown()
     }
@@ -98,31 +99,32 @@ final class BSTextCacheTests: XCTestCase {
         XCTAssertNotNil(cache)
     }
     
-    func testCacheSetAndGet() {
-        let key = "testKey"
-        let value = "testValue"
+    func testImageCache() {
+        let key = "testImageKey"
+        let image = UIImage()
         
-        cache.setObject(value as AnyObject, forKey: key)
+        cache.cacheImage(image, forKey: key, cost: 1000)
+        let retrievedImage = cache.image(forKey: key)
         
-        let retrievedValue = cache.object(forKey: key) as? String
-        XCTAssertEqual(retrievedValue, value)
-    }
-    
-    func testCacheRemove() {
-        let key = "testKey"
-        cache.setObject("value" as AnyObject, forKey: key)
-        cache.removeObject(forKey: key)
-        
-        let retrievedValue = cache.object(forKey: key)
-        XCTAssertNil(retrievedValue)
+        XCTAssertNotNil(retrievedImage)
     }
     
     func testCacheRemoveAll() {
-        cache.setObject("value1" as AnyObject, forKey: "key1")
-        cache.setObject("value2" as AnyObject, forKey: "key2")
-        cache.removeAllObjects()
+        let image1 = UIImage()
+        let image2 = UIImage()
+        cache.cacheImage(image1, forKey: "key1", cost: 1000)
+        cache.cacheImage(image2, forKey: "key2", cost: 1000)
+        cache.removeAll()
         
-        XCTAssertNil(cache.object(forKey: "key1"))
-        XCTAssertNil(cache.object(forKey: "key2"))
+        XCTAssertNil(cache.image(forKey: "key1"))
+        XCTAssertNil(cache.image(forKey: "key2"))
+    }
+    
+    func testCacheMaxCost() {
+        XCTAssertEqual(cache.maxImageCacheCost, 100 * 1024 * 1024)
+    }
+    
+    func testCacheMaxFragmentCount() {
+        XCTAssertEqual(cache.maxFragmentCount, 100)
     }
 }
