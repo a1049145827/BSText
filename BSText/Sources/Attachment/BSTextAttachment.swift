@@ -1,4 +1,6 @@
 import UIKit
+import ImageIO
+import MobileCoreServices
 
 @objcMembers
 open class BSTextAttachment: NSTextAttachment {
@@ -7,7 +9,7 @@ open class BSTextAttachment: NSTextAttachment {
     
     public var displaySize: CGSize = CGSize(width: 0, height: 0)
     
-    public private(set) var state: State = .placeholder
+    public var state: State = .placeholder
     
     public var cacheKey: String?
     
@@ -139,6 +141,127 @@ open class BSTextAttachment: NSTextAttachment {
     }
 }
 
+@objcMembers
+open class BSTextAnimatedImageAttachment: BSTextAttachment {
+    
+    public private(set) var animatedFrames: [UIImage] = []
+    public private(set) var frameDurations: [TimeInterval] = []
+    public private(set) var totalDuration: TimeInterval = 0
+    
+    private var displayLink: CADisplayLink?
+    private var currentFrameIndex: Int = 0
+    private var elapsedTime: TimeInterval = 0
+    
+    public override init(type: BSTextAttachmentType) {
+        super.init(type: type)
+        if type == .animatedImage {
+            displaySize = CGSize(width: 200, height: 200)
+        }
+    }
+    
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+    
+    public func loadAnimatedImage(from data: Data) {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
+            state = .failed
+            delegate?.attachmentDidFailLoading?(self)
+            return
+        }
+        
+        let frameCount = CGImageSourceGetCount(source)
+        guard frameCount > 0 else {
+            state = .failed
+            delegate?.attachmentDidFailLoading?(self)
+            return
+        }
+        
+        var frames: [UIImage] = []
+        var durations: [TimeInterval] = []
+        var totalDuration: TimeInterval = 0
+        
+        for i in 0..<frameCount {
+            guard let cgImage = CGImageSourceCreateImageAtIndex(source, i, nil) else {
+                continue
+            }
+            
+            let image = UIImage(cgImage: cgImage)
+            frames.append(image)
+            
+            var duration: TimeInterval = 0.1
+            
+            if let properties = CGImageSourceCopyPropertiesAtIndex(source, i, nil) as? [String: Any],
+               let gifProperties = properties[kCGImagePropertyGIFDictionary as String] as? [String: Any] {
+                if let unclampedDelayTime = gifProperties[kCGImagePropertyGIFUnclampedDelayTime as String] as? TimeInterval {
+                    duration = unclampedDelayTime
+                } else if let delayTime = gifProperties[kCGImagePropertyGIFDelayTime as String] as? TimeInterval {
+                    duration = delayTime
+                }
+            }
+            
+            if duration < 0.02 {
+                duration = 0.1
+            }
+            
+            durations.append(duration)
+            totalDuration += duration
+        }
+        
+        self.animatedFrames = frames
+        self.frameDurations = durations
+        self.totalDuration = totalDuration
+        self.state = .loaded
+        
+        if let firstFrame = frames.first {
+            self.image = firstFrame
+        }
+        
+        delegate?.attachmentDidFinishLoading?(self)
+    }
+    
+    public func startAnimating() {
+        guard displayLink == nil, animatedFrames.count > 1 else { return }
+        
+        displayLink = CADisplayLink(target: self, selector: #selector(updateFrame))
+        displayLink?.add(to: .main, forMode: .common)
+    }
+    
+    public func stopAnimating() {
+        displayLink?.invalidate()
+        displayLink = nil
+        currentFrameIndex = 0
+        elapsedTime = 0
+    }
+    
+    @objc private func updateFrame(_ displayLink: CADisplayLink) {
+        guard frameDurations.count > currentFrameIndex else {
+            currentFrameIndex = 0
+            return
+        }
+        
+        let frameDuration = frameDurations[currentFrameIndex]
+        elapsedTime += displayLink.duration
+        
+        if elapsedTime >= frameDuration {
+            elapsedTime = 0
+            currentFrameIndex = (currentFrameIndex + 1) % animatedFrames.count
+            self.image = animatedFrames[currentFrameIndex]
+        }
+    }
+    
+    open override func image(forBounds imageBounds: CGRect, textContainer: NSTextContainer?, characterIndex charIndex: Int) -> UIImage? {
+        if state == .loaded, let firstFrame = animatedFrames.first {
+            return firstFrame
+        }
+        return super.image(forBounds: imageBounds, textContainer: textContainer, characterIndex: charIndex)
+    }
+    
+    deinit {
+        stopAnimating()
+    }
+}
+
 @objc public protocol BSTextAttachmentDelegate: NSObjectProtocol {
     @objc optional func attachmentDidStartLoading(_ attachment: BSTextAttachment)
     @objc optional func attachmentDidFinishLoading(_ attachment: BSTextAttachment)
@@ -151,6 +274,31 @@ public extension BSTextAttachment {
         let attachment = BSTextAttachment(type: .image)
         attachment.url = url
         attachment.displaySize = displaySize ?? CGSize(width: 200, height: 200)
+        return attachment
+    }
+    
+    static func animatedImageAttachment(url: URL, displaySize: CGSize? = nil) -> BSTextAnimatedImageAttachment {
+        let attachment = BSTextAnimatedImageAttachment(type: .animatedImage)
+        attachment.url = url
+        attachment.displaySize = displaySize ?? CGSize(width: 200, height: 200)
+        
+        Task {
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                attachment.loadAnimatedImage(from: data)
+                attachment.startAnimating()
+            } catch {
+                attachment.state = .failed
+            }
+        }
+        
+        return attachment
+    }
+    
+    static func animatedImageAttachment(data: Data, displaySize: CGSize? = nil) -> BSTextAnimatedImageAttachment {
+        let attachment = BSTextAnimatedImageAttachment(type: .animatedImage)
+        attachment.displaySize = displaySize ?? CGSize(width: 200, height: 200)
+        attachment.loadAnimatedImage(from: data)
         return attachment
     }
     
