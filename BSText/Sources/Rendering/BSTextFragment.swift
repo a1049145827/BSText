@@ -109,6 +109,35 @@ open class BSTextFragment: NSObject {
     }
 }
 
+// MARK: - Fragment Decoration
+
+@objc public enum BSTextFragmentDecorationType: Int {
+    case highlight = 0
+    case underline = 1
+    case strikethrough = 2
+    case custom = 3
+}
+
+public struct BSTextFragmentDecoration {
+    public let range: NSRange
+    public let type: BSTextFragmentDecorationType
+    public let color: UIColor?
+    public let backgroundColor: UIColor?
+    public let isUnderline: Bool
+    public let baselineOffset: CGFloat
+    public let font: UIFont?
+    
+    public init(range: NSRange, type: BSTextFragmentDecorationType, color: UIColor?, backgroundColor: UIColor?, isUnderline: Bool, baselineOffset: CGFloat, font: UIFont?) {
+        self.range = range
+        self.type = type
+        self.color = color
+        self.backgroundColor = backgroundColor
+        self.isUnderline = isUnderline
+        self.baselineOffset = baselineOffset
+        self.font = font
+    }
+}
+
 // MARK: - Delegate Protocol
 
 /// Delegate protocol for fragment decoration renderers.
