@@ -1,0 +1,34 @@
+name: BSTextDemoApp
+options:
+  deploymentTarget:
+    iOS: 17.0
+targets:
+  BSTextDemoApp:
+    type: application
+    platform: iOS
+    info:
+      path: Info.plist
+      properties:
+        UILaunchStoryboardName: LaunchScreen
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: NO
+          UISceneConfigurations:
+            UIWindowSceneSessionRoleApplication:
+              - UISceneConfigurationName: Default Configuration
+                UISceneDelegateClassName: "$(PRODUCT_MODULE_NAME).SceneDelegate"
+    sources:
+      - path: .
+        exclude:
+          - Info.plist
+          - project.yml
+    dependencies:
+      - package: BSText
+    settings:
+      base:
+        SWIFT_VERSION: 5.9
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.BSTextTest1
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 5FW9DTQ6YS
+packages:
+  BSText:
+    path: ../
