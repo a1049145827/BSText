@@ -350,34 +350,7 @@ class UndoRedoDemoViewController: UIViewController {
     }
 }
 
-class AsyncDemoViewController: UIViewController {
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .white
-        
-        let textView = BSTextView()
-        textView.translatesAutoresizingMaskIntoConstraints = false
-        textView.isEditable = false
-        textView.font = .systemFont(ofSize: 14)
-        textView.layer.borderColor = UIColor.lightGray.cgColor
-        textView.layer.borderWidth = 1
-        textView.layer.cornerRadius = 8
-        view.addSubview(textView)
-        
-        var largeText = ""
-        for i in 1...100 {
-            largeText += "Line \(i): This is a test line for asynchronous rendering performance.\n"
-        }
-        textView.text = largeText
-        
-        NSLayoutConstraint.activate([
-            textView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            textView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            textView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            textView.heightAnchor.constraint(equalToConstant: 300)
-        ])
-    }
-}
+
 
 class ResizeDemoViewController: UIViewController {
     private let textView = BSTextView()
