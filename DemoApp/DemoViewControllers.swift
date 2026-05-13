@@ -182,7 +182,7 @@ class ResizeDemoViewController: UIViewController {
     private let textView = BSTextView()
     private let resizeHandle = UIView()
     private var minHeight: CGFloat = 60
-    private var maxHeight: CGFloat = 200
+    private var maxHeight: CGFloat = 600
     private var startY: CGFloat = 0
     private var startHeight: CGFloat = 0
     private var textViewHeightConstraint: NSLayoutConstraint!
@@ -190,6 +190,8 @@ class ResizeDemoViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
+        
+        maxHeight = view.safeAreaLayoutGuide.layoutFrame.height - 60
         
         textView.translatesAutoresizingMaskIntoConstraints = false
         textView.layer.borderColor = UIColor.systemGray3.cgColor
