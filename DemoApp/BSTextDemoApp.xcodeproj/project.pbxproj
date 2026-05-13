@@ -13,6 +13,7 @@
 		8432FD15EDCB5B65E936C1F5 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08709A81B430D44978C7D294 /* ViewController.swift */; };
 		8AB741805ABE007735CF2649 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6825A77C1F5D8BE51375F45 /* SceneDelegate.swift */; };
 		9320EE5DAE5E53DDED73FB74 /* project.yml in Resources */ = {isa = PBXBuildFile; fileRef = 8BCC5F45AE76527E4ABCAE33 /* project.yml */; };
+		97110BAD67B85A744782CF83 /* ResizeDemoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 119C58BC3632D36B2E701D88 /* ResizeDemoViewController.swift */; };
 		A9DDD42CBAF4EC9290C264E8 /* DemoViewControllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0366511240049B5D634531F3 /* DemoViewControllers.swift */; };
 		BB8215E23ED8EED89BDF1C95 /* AsyncDemoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48786AFD5B39D721857ECCC1 /* AsyncDemoViewController.swift */; };
 /* End PBXBuildFile section */
@@ -21,6 +22,7 @@
 		0366511240049B5D634531F3 /* DemoViewControllers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoViewControllers.swift; sourceTree = "<group>"; };
 		08709A81B430D44978C7D294 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		0FA90E67A157F53C1D87E2E3 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		119C58BC3632D36B2E701D88 /* ResizeDemoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResizeDemoViewController.swift; sourceTree = "<group>"; };
 		3AB28A86572443B78905B3E1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		48786AFD5B39D721857ECCC1 /* AsyncDemoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncDemoViewController.swift; sourceTree = "<group>"; };
 		5BA9BBBDCA4EF1AC458893F9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -59,6 +61,7 @@
 				5BA9BBBDCA4EF1AC458893F9 /* Info.plist */,
 				0FA90E67A157F53C1D87E2E3 /* LaunchScreen.storyboard */,
 				8BCC5F45AE76527E4ABCAE33 /* project.yml */,
+				119C58BC3632D36B2E701D88 /* ResizeDemoViewController.swift */,
 				A6825A77C1F5D8BE51375F45 /* SceneDelegate.swift */,
 				08709A81B430D44978C7D294 /* ViewController.swift */,
 			);
@@ -163,6 +166,7 @@
 				6B27C54510DD5CA325BEE592 /* AppDelegate.swift in Sources */,
 				BB8215E23ED8EED89BDF1C95 /* AsyncDemoViewController.swift in Sources */,
 				A9DDD42CBAF4EC9290C264E8 /* DemoViewControllers.swift in Sources */,
+				97110BAD67B85A744782CF83 /* ResizeDemoViewController.swift in Sources */,
 				8AB741805ABE007735CF2649 /* SceneDelegate.swift in Sources */,
 				8432FD15EDCB5B65E936C1F5 /* ViewController.swift in Sources */,
 			);
