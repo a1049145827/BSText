@@ -144,13 +144,10 @@ open class BSTextAttachment: NSTextAttachment {
 @objcMembers
 open class BSTextAnimatedImageAttachment: BSTextAttachment {
     
-    public private(set) var animatedFrames: [UIImage] = []
-    public private(set) var frameDurations: [TimeInterval] = []
+    public private(set) var animatedImage: UIImage?
     public private(set) var totalDuration: TimeInterval = 0
     
-    private var displayLink: CADisplayLink?
-    private var currentFrameIndex: Int = 0
-    private var elapsedTime: TimeInterval = 0
+    private var animator: BSTextAnimatedImageAnimator?
     
     public override init(type: BSTextAttachmentType) {
         super.init(type: type)
@@ -164,101 +161,83 @@ open class BSTextAnimatedImageAttachment: BSTextAttachment {
     }
     
     public func loadAnimatedImage(from data: Data) {
-        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
-            state = .failed
-            delegate?.attachmentDidFailLoading?(self)
+        guard let image = UIImage(data: data), image.images?.count ?? 0 > 1 else {
+            if let staticImage = UIImage(data: data) {
+                self.image = staticImage
+                self.animatedImage = staticImage
+                self.state = .loaded
+                delegate?.attachmentDidFinishLoading?(self)
+            } else {
+                self.state = .failed
+                delegate?.attachmentDidFailLoading?(self)
+            }
             return
         }
         
-        let frameCount = CGImageSourceGetCount(source)
-        guard frameCount > 0 else {
-            state = .failed
-            delegate?.attachmentDidFailLoading?(self)
-            return
-        }
-        
-        var frames: [UIImage] = []
-        var durations: [TimeInterval] = []
-        var totalDuration: TimeInterval = 0
-        
-        for i in 0..<frameCount {
-            guard let cgImage = CGImageSourceCreateImageAtIndex(source, i, nil) else {
-                continue
-            }
-            
-            let image = UIImage(cgImage: cgImage)
-            frames.append(image)
-            
-            var duration: TimeInterval = 0.1
-            
-            if let properties = CGImageSourceCopyPropertiesAtIndex(source, i, nil) as? [String: Any],
-               let gifProperties = properties[kCGImagePropertyGIFDictionary as String] as? [String: Any] {
-                if let unclampedDelayTime = gifProperties[kCGImagePropertyGIFUnclampedDelayTime as String] as? TimeInterval {
-                    duration = unclampedDelayTime
-                } else if let delayTime = gifProperties[kCGImagePropertyGIFDelayTime as String] as? TimeInterval {
-                    duration = delayTime
-                }
-            }
-            
-            if duration < 0.02 {
-                duration = 0.1
-            }
-            
-            durations.append(duration)
-            totalDuration += duration
-        }
-        
-        self.animatedFrames = frames
-        self.frameDurations = durations
-        self.totalDuration = totalDuration
+        self.animatedImage = image
+        self.totalDuration = image.duration > 0 ? image.duration : Double(image.images?.count ?? 1) * 0.1
+        self.image = image
         self.state = .loaded
-        
-        if let firstFrame = frames.first {
-            self.image = firstFrame
-        }
         
         delegate?.attachmentDidFinishLoading?(self)
     }
     
     public func startAnimating() {
-        guard displayLink == nil, animatedFrames.count > 1 else { return }
+        guard let image = animatedImage, image.images?.count ?? 0 > 1 else { return }
         
-        displayLink = CADisplayLink(target: self, selector: #selector(updateFrame))
-        displayLink?.add(to: .main, forMode: .common)
+        if animator == nil {
+            animator = BSTextAnimatedImageAnimator(image: image)
+        }
+        animator?.start()
     }
     
     public func stopAnimating() {
-        displayLink?.invalidate()
-        displayLink = nil
-        currentFrameIndex = 0
-        elapsedTime = 0
-    }
-    
-    @objc private func updateFrame(_ displayLink: CADisplayLink) {
-        guard frameDurations.count > currentFrameIndex else {
-            currentFrameIndex = 0
-            return
-        }
-        
-        let frameDuration = frameDurations[currentFrameIndex]
-        elapsedTime += displayLink.duration
-        
-        if elapsedTime >= frameDuration {
-            elapsedTime = 0
-            currentFrameIndex = (currentFrameIndex + 1) % animatedFrames.count
-            self.image = animatedFrames[currentFrameIndex]
-        }
-    }
-    
-    open override func image(forBounds imageBounds: CGRect, textContainer: NSTextContainer?, characterIndex charIndex: Int) -> UIImage? {
-        if state == .loaded, let firstFrame = animatedFrames.first {
-            return firstFrame
-        }
-        return super.image(forBounds: imageBounds, textContainer: textContainer, characterIndex: charIndex)
+        animator?.stop()
     }
     
     deinit {
         stopAnimating()
+    }
+}
+
+class BSTextAnimatedImageAnimator {
+    private weak var image: UIImage?
+    private var displayLink: CADisplayLink?
+    private var currentIndex: Int = 0
+    private var elapsedTime: TimeInterval = 0
+    
+    init(image: UIImage) {
+        self.image = image
+    }
+    
+    func start() {
+        guard displayLink == nil else { return }
+        
+        currentIndex = 0
+        displayLink = CADisplayLink(target: self, selector: #selector(tick))
+        displayLink?.add(to: .main, forMode: .common)
+    }
+    
+    func stop() {
+        displayLink?.invalidate()
+        displayLink = nil
+        currentIndex = 0
+        elapsedTime = 0
+    }
+    
+    @objc private func tick(_ displayLink: CADisplayLink) {
+        guard let image = image, let frames = image.images, frames.count > 0 else {
+            stop()
+            return
+        }
+        
+        let frameDuration = image.duration / Double(frames.count)
+        elapsedTime += displayLink.duration
+        
+        if elapsedTime >= frameDuration {
+            elapsedTime = 0
+            currentIndex = (currentIndex + 1) % frames.count
+        }
     }
 }
 
