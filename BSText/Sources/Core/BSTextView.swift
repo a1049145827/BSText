@@ -100,13 +100,13 @@ open class BSTextView: UITextView {
         // Create viewport controller first
         viewportController = BSTextViewportController()
 
-        // Initialize with TextKit 2 components if needed
-        let container = textContainer ?? NSTextContainer(size: frame.size)
-        container.widthTracksTextView = true
-        container.heightTracksTextView = false
+        // Initialize UITextView with the provided container or nil (let UITextView create its own)
+        // Note: If we create a new NSTextContainer, it must already have a layout manager
+        super.init(frame: frame, textContainer: textContainer)
 
-        // Initialize UITextView
-        super.init(frame: frame, textContainer: container)
+        // Configure text container settings
+        self.textContainer.widthTracksTextView = true
+        self.textContainer.heightTracksTextView = false
 
         // Set up BSText components
         setupBSText()
@@ -312,6 +312,243 @@ open class BSTextView: UITextView {
     /// Returns the number of visible fragments for debugging purposes.
     public var visibleFragmentCount: Int {
         return viewportController.estimatedVisibleFragmentCount()
+    }
+    
+    // MARK: - Text Editing
+    
+    /// Replaces the selected text with the given string.
+    ///
+    /// - Parameter text: The text to replace the selection with.
+    public func replaceSelection(with text: String) {
+        let range = selectedRange
+        textStorage.beginEditing()
+        textStorage.replaceCharacters(in: range, with: text)
+        textStorage.endEditing()
+        
+        // Move cursor after the inserted text
+        selectedRange = NSRange(location: range.location + text.count, length: 0)
+    }
+    
+    /// Replaces the selected text with the given attributed string.
+    ///
+    /// - Parameter attributedText: The attributed text to replace the selection with.
+    public func replaceSelection(withAttributed attributedText: NSAttributedString) {
+        let range = selectedRange
+        textStorage.beginEditing()
+        textStorage.replaceCharacters(in: range, with: attributedText)
+        textStorage.endEditing()
+        
+        // Move cursor after the inserted text
+        selectedRange = NSRange(location: range.location + attributedText.length, length: 0)
+    }
+    
+    /// Deletes the selected text or the character before the cursor.
+    public func deleteSelectionOrBackward() {
+        let range = selectedRange
+        
+        if range.length > 0 {
+            // Delete selected text
+            textStorage.beginEditing()
+            textStorage.deleteCharacters(in: range)
+            textStorage.endEditing()
+            selectedRange = NSRange(location: range.location, length: 0)
+        } else if range.location > 0 {
+            // Delete character before cursor
+            let deleteRange = NSRange(location: range.location - 1, length: 1)
+            textStorage.beginEditing()
+            textStorage.deleteCharacters(in: deleteRange)
+            textStorage.endEditing()
+            selectedRange = NSRange(location: range.location - 1, length: 0)
+        }
+    }
+    
+    /// Deletes the character after the cursor.
+    public func deleteForward() {
+        let range = selectedRange
+        
+        if range.length > 0 {
+            // Delete selected text
+            textStorage.beginEditing()
+            textStorage.deleteCharacters(in: range)
+            textStorage.endEditing()
+            selectedRange = NSRange(location: range.location, length: 0)
+        } else if range.location < textStorage.length {
+            // Delete character after cursor
+            let deleteRange = NSRange(location: range.location, length: 1)
+            textStorage.beginEditing()
+            textStorage.deleteCharacters(in: deleteRange)
+            textStorage.endEditing()
+        }
+    }
+    
+    /// Inserts a newline at the current cursor position.
+    public func insertNewline() {
+        let range = selectedRange
+        textStorage.beginEditing()
+        textStorage.replaceCharacters(in: range, with: "\n")
+        textStorage.endEditing()
+        selectedRange = NSRange(location: range.location + 1, length: 0)
+    }
+    
+    /// Selects all text in the view.
+    public func selectAllText() {
+        selectedRange = NSRange(location: 0, length: textStorage.length)
+    }
+    
+    /// Clears all text from the view.
+    public func clearAllText() {
+        textStorage.beginEditing()
+        textStorage.deleteCharacters(in: NSRange(location: 0, length: textStorage.length))
+        textStorage.endEditing()
+    }
+    
+    // MARK: - Text Selection
+    
+    /// Returns the selected text as a string.
+    public var selectedText: String? {
+        let range = selectedRange
+        if range.length > 0 {
+            return (textStorage.string as NSString).substring(with: range)
+        }
+        return nil
+    }
+    
+    /// Returns the selected text as an attributed string.
+    public var selectedAttributedText: NSAttributedString? {
+        let range = selectedRange
+        if range.length > 0 {
+            return textStorage.attributedSubstring(from: range)
+        }
+        return nil
+    }
+    
+    /// Selects the text in the given range.
+    ///
+    /// - Parameter range: The range to select.
+    public func selectRange(_ range: NSRange) {
+        selectedRange = range
+    }
+    
+    /// Selects the word at the given location.
+    ///
+    /// - Parameter location: The location to find the word.
+    public func selectWord(at location: Int) {
+        let string = textStorage.string as NSString
+        let cursorRange = NSRange(location: location, length: 0)
+        let range = string.rangeOfWord(at: location) ?? cursorRange
+        selectedRange = range
+    }
+    
+    /// Selects the line at the given location.
+    ///
+    /// - Parameter location: The location to find the line.
+    public func selectLine(at location: Int) {
+        let string = textStorage.string as NSString
+        let cursorRange = NSRange(location: location, length: 0)
+        let range = string.lineRange(for: cursorRange)
+        selectedRange = range
+    }
+    
+    // MARK: - Text Attributes
+    
+    /// Returns the attributes at the current cursor position.
+    public var attributesAtCursor: [NSAttributedString.Key: Any] {
+        let location = selectedRange.location
+        if location <= textStorage.length {
+            return textStorage.attributes(at: location, effectiveRange: nil)
+        }
+        return typingAttributes
+    }
+    
+    /// Removes attributes from the selected range.
+    ///
+    /// - Parameter attributeNames: The names of attributes to remove.
+    public func removeAttributes(_ attributeNames: [NSAttributedString.Key]) {
+        let range = selectedRange
+        if range.length > 0 {
+            textStorage.beginEditing()
+            for name in attributeNames {
+                textStorage.removeAttribute(name, range: range)
+            }
+            textStorage.endEditing()
+        }
+    }
+    
+    /// Toggles bold attribute on the selected text.
+    public func toggleBold() {
+        let range = selectedRange
+        if range.length > 0 {
+            let currentFont = textStorage.attribute(.font, at: range.location, effectiveRange: nil) as? UIFont
+            
+            textStorage.beginEditing()
+            if let font = currentFont {
+                let newFont = font.isBold ? font.unbolded : font.bolded
+                textStorage.addAttribute(.font, value: newFont, range: range)
+            }
+            textStorage.endEditing()
+        } else {
+            // Apply to typing attributes
+            let currentFont = typingAttributes[.font] as? UIFont ?? UIFont.systemFont(ofSize: 17)
+            typingAttributes[.font] = currentFont.isBold ? currentFont.unbolded : currentFont.bolded
+        }
+    }
+    
+    /// Toggles italic attribute on the selected text.
+    public func toggleItalic() {
+        let range = selectedRange
+        if range.length > 0 {
+            let currentFont = textStorage.attribute(.font, at: range.location, effectiveRange: nil) as? UIFont
+            
+            textStorage.beginEditing()
+            if let font = currentFont {
+                let newFont = font.isItalic ? font.unitalicized : font.italicized
+                textStorage.addAttribute(.font, value: newFont, range: range)
+            }
+            textStorage.endEditing()
+        } else {
+            // Apply to typing attributes
+            let currentFont = typingAttributes[.font] as? UIFont ?? UIFont.systemFont(ofSize: 17)
+            typingAttributes[.font] = currentFont.isItalic ? currentFont.unitalicized : currentFont.italicized
+        }
+    }
+    
+    // MARK: - Text Search
+    
+    /// Finds the first occurrence of the given string.
+    ///
+    /// - Parameters:
+    ///   - string: The string to search for.
+    ///   - caseSensitive: Whether the search should be case sensitive.
+    /// - Returns: The range of the first occurrence, or nil if not found.
+    public func findFirstOccurrence(of string: String, caseSensitive: Bool = true) -> NSRange? {
+        let options: NSString.CompareOptions = caseSensitive ? [] : .caseInsensitive
+        let range = (textStorage.string as NSString).range(of: string, options: options)
+        return range.location != NSNotFound ? range : nil
+    }
+    
+    /// Finds all occurrences of the given string.
+    ///
+    /// - Parameters:
+    ///   - string: The string to search for.
+    ///   - caseSensitive: Whether the search should be case sensitive.
+    /// - Returns: An array of ranges for all occurrences.
+    public func findAllOccurrences(of string: String, caseSensitive: Bool = true) -> [NSRange] {
+        let options: NSString.CompareOptions = caseSensitive ? [] : .caseInsensitive
+        let fullText = textStorage.string as NSString
+        var ranges: [NSRange] = []
+        var searchRange = NSRange(location: 0, length: fullText.length)
+        var foundRange = fullText.range(of: string, options: options, range: searchRange)
+        
+        while foundRange.location != NSNotFound {
+            ranges.append(foundRange)
+            searchRange = NSRange(
+                location: foundRange.location + foundRange.length,
+                length: fullText.length - foundRange.location - foundRange.length
+            )
+            foundRange = fullText.range(of: string, options: options, range: searchRange)
+        }
+        
+        return ranges
     }
 }
 
