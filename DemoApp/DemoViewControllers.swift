@@ -185,6 +185,7 @@ class ResizeDemoViewController: UIViewController {
     private var maxHeight: CGFloat = 200
     private var startY: CGFloat = 0
     private var startHeight: CGFloat = 0
+    private var textViewHeightConstraint: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -210,11 +211,13 @@ class ResizeDemoViewController: UIViewController {
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
         resizeHandle.addGestureRecognizer(panGesture)
         
+        textViewHeightConstraint = textView.heightAnchor.constraint(equalToConstant: 100)
+        
         NSLayoutConstraint.activate([
             textView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             textView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             textView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            textView.heightAnchor.constraint(equalToConstant: 100),
+            textViewHeightConstraint,
             
             resizeHandle.centerXAnchor.constraint(equalTo: textView.centerXAnchor),
             resizeHandle.topAnchor.constraint(equalTo: textView.bottomAnchor, constant: 0)
@@ -227,14 +230,14 @@ class ResizeDemoViewController: UIViewController {
         switch gesture.state {
         case .began:
             startY = gesture.location(in: view).y
-            startHeight = textView.frame.height
+            startHeight = textViewHeightConstraint.constant
             
         case .changed:
             let deltaY = gesture.location(in: view).y - startY
             var newHeight = startHeight + deltaY
             newHeight = max(minHeight, min(newHeight, maxHeight))
             
-            textView.heightAnchor.constraint(equalToConstant: newHeight).isActive = true
+            textViewHeightConstraint.constant = newHeight
             view.layoutIfNeeded()
             
         case .ended, .cancelled:
