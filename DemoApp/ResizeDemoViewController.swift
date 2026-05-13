@@ -143,18 +143,33 @@ class ResizeDemoViewController: UIViewController {
     private func setupComplexContent() {
         let content = NSMutableAttributedString()
         
-        let title = NSAttributedString(string: "📝 BSText Demo\n\n", attributes: [
+        let title = NSAttributedString(string: "📝 BSText Demo with GIF\n\n", attributes: [
             .font: UIFont.boldSystemFont(ofSize: 18),
             .foregroundColor: UIColor.black
         ])
         content.append(title)
         
-        let codeBlock = """
-        ```swift
-        let text = "Hello"
-        print(text)
-        ```
+        let intro = NSAttributedString(string: "BSText supports animated GIF images!\n\n", attributes: [
+            .font: UIFont.systemFont(ofSize: 14),
+            .foregroundColor: UIColor.darkGray
+        ])
+        content.append(intro)
         
+        content.append(NSAttributedString(string: "Loading GIF from URL: ", attributes: [
+            .font: UIFont.boldSystemFont(ofSize: 14),
+            .foregroundColor: UIColor.black
+        ]))
+        
+        let sampleGifUrl = URL(string: "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif")!
+        let gifAttachment = BSTextAttachment.animatedImageAttachment(
+            url: sampleGifUrl,
+            displaySize: CGSize(width: 120, height: 120)
+        )
+        content.append(NSAttributedString(attachment: gifAttachment))
+        
+        content.append(NSAttributedString(string: "\n\n"))
+        
+        let codeBlock = """
         **Bold text** and *italic text* supported.
         
         > This is a blockquote with important information.
@@ -167,11 +182,17 @@ class ResizeDemoViewController: UIViewController {
         
         Links: [BSText](https://github.com)
         
-        🎉 🚀 💡 🎯 🌟 💪 🔥 ✨ ❤️ 😊
         """
         
         let parser = BSTextMarkdownParser()
         content.append(parser.parse(codeBlock))
+        
+        content.append(NSAttributedString(string: "\nEmojis: "))
+        let emojis = ["🎉", "🚀", "💡", "🎯", "🌟"]
+        for emoji in emojis {
+            let emojiAttachment = BSTextAttachment.emojiAttachment(emoji: emoji)
+            content.append(NSAttributedString(attachment: emojiAttachment))
+        }
         
         textView.attributedText = content
     }
