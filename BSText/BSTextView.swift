@@ -98,7 +98,7 @@ fileprivate class TextViewUndoObject: NSObject {
  */
 open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollViewDelegate, TextDebugTarget, TextKeyboardObserver, NSSecureCoding {
     
-    public lazy var tokenizer: UITextInputTokenizer = UITextInputStringTokenizer(textInput: UITextView())
+    public lazy var tokenizer: UITextInputTokenizer = UITextInputStringTokenizer(textInput: self)
     public var markedTextRange: UITextRange?
     
     @objc public static let textViewTextDidBeginEditingNotification = "TextViewTextDidBeginEditing"
@@ -681,7 +681,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             if NSEqualRanges(_selectedRange, newValue) {
                 return
             }
-            if (_markedTextRange != nil) {
+            if (markedTextRange != nil) {
                 return
             }
             state.typingAttributesOnce = false
@@ -852,7 +852,6 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     
     
     fileprivate lazy var _selectedTextRange = TextRange.default() /// nonnull
-    fileprivate var _markedTextRange: TextRange?
     
     fileprivate weak var _outerDelegate: TextViewDelegate?
     
@@ -1042,8 +1041,8 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             selectedRange = _trackingRange!
         }
         
-        if _markedTextRange != nil {
-            var rects = _innerLayout?.selectionRectsWithoutStartAndEnd(for: _markedTextRange!)
+        if let markedRange = markedTextRange as? TextRange {
+            var rects = _innerLayout?.selectionRectsWithoutStartAndEnd(for: markedRange)
             if let aRects = rects {
                 allRects.append(contentsOf: aRects)
             }
@@ -1181,11 +1180,11 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         
         if var newPos = _innerLayout?.closestPosition(to: trackingPoint) {
             newPos = _correctedTextPosition(newPos)!
-            if _markedTextRange != nil {
-                if newPos.compare(_markedTextRange!.start) == .orderedAscending {
-                    newPos = _markedTextRange!.start
-                } else if newPos.compare(_markedTextRange!.end) == .orderedDescending {
-                    newPos = _markedTextRange!.end
+            if let markedRange = markedTextRange as? TextRange {
+                if newPos.compare(markedRange.start) == .orderedAscending {
+                    newPos = markedRange.start
+                } else if newPos.compare(markedRange.end) == .orderedDescending {
+                    newPos = markedRange.end
                 }
             }
             _trackingRange = TextRange.range(with: NSRange(location: newPos.offset, length: 0), affinity: newPos.affinity)
@@ -1271,7 +1270,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         }
         
         var position: TextPosition?
-        if _markedTextRange != nil {
+        if markedTextRange != nil {
             position = selectedRange.end
         } else {
             position = _innerLayout?.position(for: _convertPoint(toLayout: magPoint), oldPosition: (state.trackingGrabber == .start ? selectedRange.start : selectedRange.end), otherPosition: (state.trackingGrabber == .start ? selectedRange.end : selectedRange.start))
@@ -1659,7 +1658,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                     var newPos = _innerLayout?.closestPosition(to: trackingPoint)
                     newPos = _correctedTextPosition(newPos)
                     if newPos != nil {
-                        if let m = _markedTextRange {
+                        if let m = markedTextRange as? TextRange {
                             if newPos?.compare(m.start) != .orderedDescending {
                                 newPos = m.start
                             } else if newPos?.compare(m.end) != .orderedAscending {
@@ -1671,7 +1670,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                     }
                     _hideMenu()
                     
-                    if _markedTextRange != nil {
+                    if markedTextRange != nil {
                         _showMagnifierRanged()
                     } else {
                         _showMagnifierCaret()
@@ -1794,7 +1793,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                             self._showMagnifierCaret()
                             self._updateTextRangeByTrackingPreSelect()
                         } else if self.state.trackingCaret {
-                            if self._markedTextRange != nil {
+                            if self.markedTextRange != nil {
                                 self._showMagnifierRanged()
                             } else {
                                 self._showMagnifierCaret()
@@ -3179,7 +3178,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                 } else if state.trackingPreSelect {
                     _updateTextRangeByTrackingPreSelect()
                     showMagnifierCaret = true
-                } else if state.trackingCaret || (_markedTextRange != nil) || isFirstResponder {
+                } else if state.trackingCaret || (markedTextRange != nil) || isFirstResponder {
                     if state.trackingCaret || state.touchMoved != .none {
                         state.trackingCaret = true
                         _hideMenu()
@@ -3193,7 +3192,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                             }
                         }
                         _updateTextRangeByTrackingCaret()
-                        if _markedTextRange != nil {
+                        if markedTextRange != nil {
                             showMagnifierRanged = true
                         } else {
                             showMagnifierCaret = true
@@ -3801,6 +3800,9 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         if text == "" {
             return
         }
+        if markedTextRange != nil {
+            unmarkText()
+        }
         if !NSEqualRanges(_lastTypeRange ?? NSMakeRange(0, 0), _selectedTextRange.asRange) {
             _saveToUndoStack()
             _resetRedoStack()
@@ -3840,7 +3842,7 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
                 range = extendRange!.asRange
             }
         }
-        if !NSEqualRanges(_lastTypeRange!, _selectedTextRange.asRange) {
+        if !NSEqualRanges(_lastTypeRange ?? NSMakeRange(0, 0), _selectedTextRange.asRange) {
             _saveToUndoStack()
             _resetRedoStack()
         }
@@ -3891,7 +3893,9 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         }
     }
     
-    public var markedTextStyle: [NSAttributedString.Key : Any]?
+    public var markedTextStyle: [NSAttributedString.Key : Any]? = [
+        .backgroundColor: UIColor.systemBlue.withAlphaComponent(0.15)
+    ]
     
     /*
      Replace current markedText with the new markedText
@@ -3913,11 +3917,11 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             }
         }
         
-        if !NSEqualRanges(_lastTypeRange!, _selectedTextRange.asRange) {
+        if !NSEqualRanges(_lastTypeRange ?? NSMakeRange(0, 0), _selectedTextRange.asRange) {
             _saveToUndoStack()
             _resetRedoStack()
         }
-        
+
         var needApplyHolderAttribute = false
         if _innerText.length > 0 && (markedTextRange != nil) {
             _updateAttributesHolder()
@@ -3951,7 +3955,13 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             markedTextRange = nil
         } else {
             if needApplyHolderAttribute {
-                _innerText.setAttributes(_typingAttributesHolder.bs_attributes, range: (markedTextRange as! TextRange).asRange)
+                var attributes = _typingAttributesHolder.bs_attributes ?? [:]
+                if let markedStyle = markedTextStyle {
+                    for (key, value) in markedStyle {
+                        attributes[key] = value
+                    }
+                }
+                _innerText.setAttributes(attributes, range: (markedTextRange as! TextRange).asRange)
             }
             _innerText.bs_removeDiscontinuousAttributes(in: (markedTextRange as! TextRange).asRange)
         }
@@ -3959,7 +3969,13 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
         _inputDelegate?.selectionDidChange(self)
         _inputDelegate?.textDidChange(self)
         
-        _updateOuterProperties()
+        // During marked text input (e.g. Korean IME composition), skip
+        // _updateOuterProperties() to avoid triggering KVO on attributedText
+        // which may cause external observers to reset the text and break
+        // the composition state (ㅇㅏㄴ → 안).
+        if markedTextRange == nil {
+            _updateOuterProperties()
+        }
         _updateLayout()
         _updateSelectionView()
         _scrollRangeToVisible(_selectedTextRange)
@@ -3972,7 +3988,11 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
     }
     
     public func unmarkText() {
+        _inputDelegate?.textWillChange(self)
+        _inputDelegate?.selectionWillChange(self)
         markedTextRange = nil
+        _inputDelegate?.selectionDidChange(self)
+        _inputDelegate?.textDidChange(self)
         _endTouchTracking()
         _hideMenu()
         if _parseText() {
@@ -4131,7 +4151,10 @@ open class BSTextView: UIScrollView, UITextInput, UITextInputTraits, UIScrollVie
             return nil
         }
         
-        if newLocation != 0 && newLocation != _innerText.length {
+        // Skip composed character sequence extension during marked text input
+        // (e.g. Korean IME composing ㅇㅏㄴ → 안) to allow the input method
+        // to freely control cursor position within the composition.
+        if newLocation != 0 && newLocation != _innerText.length && markedTextRange == nil {
             // fix emoji
             _updateIfNeeded()
             let extendRange: TextRange? = _innerLayout?.textRange(byExtending: TextPosition(offset: newLocation))
