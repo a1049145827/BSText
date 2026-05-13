@@ -13,10 +13,11 @@
 		8432FD15EDCB5B65E936C1F5 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08709A81B430D44978C7D294 /* ViewController.swift */; };
 		8AB741805ABE007735CF2649 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6825A77C1F5D8BE51375F45 /* SceneDelegate.swift */; };
 		9320EE5DAE5E53DDED73FB74 /* project.yml in Resources */ = {isa = PBXBuildFile; fileRef = 8BCC5F45AE76527E4ABCAE33 /* project.yml */; };
-		F326E09477997A9DE0A1D019 /* BSTextDemoApp.xcodeproj in Resources */ = {isa = PBXBuildFile; fileRef = B2156C1CD62119C3AB233EC4 /* BSTextDemoApp.xcodeproj */; };
+		A9DDD42CBAF4EC9290C264E8 /* DemoViewControllers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0366511240049B5D634531F3 /* DemoViewControllers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0366511240049B5D634531F3 /* DemoViewControllers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoViewControllers.swift; sourceTree = "<group>"; };
 		08709A81B430D44978C7D294 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		0FA90E67A157F53C1D87E2E3 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3AB28A86572443B78905B3E1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -24,7 +25,6 @@
 		6DF70EAC1589D7CE8C08D60A /* BSText */ = {isa = PBXFileReference; lastKnownFileType = folder; name = BSText; path = ..; sourceTree = SOURCE_ROOT; };
 		8BCC5F45AE76527E4ABCAE33 /* project.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = project.yml; sourceTree = "<group>"; };
 		A6825A77C1F5D8BE51375F45 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		B2156C1CD62119C3AB233EC4 /* BSTextDemoApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = BSTextDemoApp.xcodeproj; sourceTree = "<group>"; };
 		E8347596BB5C8E0722E04C7E /* BSTextDemoApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BSTextDemoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -52,7 +52,7 @@
 			isa = PBXGroup;
 			children = (
 				3AB28A86572443B78905B3E1 /* AppDelegate.swift */,
-				B2156C1CD62119C3AB233EC4 /* BSTextDemoApp.xcodeproj */,
+				0366511240049B5D634531F3 /* DemoViewControllers.swift */,
 				5BA9BBBDCA4EF1AC458893F9 /* Info.plist */,
 				0FA90E67A157F53C1D87E2E3 /* LaunchScreen.storyboard */,
 				8BCC5F45AE76527E4ABCAE33 /* project.yml */,
@@ -61,11 +61,6 @@
 			);
 			name = DemoApp;
 			path = .;
-			sourceTree = "<group>";
-		};
-		6B2763582FB4526C00B59477 /* Products */ = {
-			isa = PBXGroup;
-			name = Products;
 			sourceTree = "<group>";
 		};
 		86FB1F850F7C8D7E745A8398 /* Packages */ = {
@@ -138,12 +133,6 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0F84D0F713F4F0FA2B30C847 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 6B2763582FB4526C00B59477 /* Products */;
-					ProjectRef = B2156C1CD62119C3AB233EC4 /* BSTextDemoApp.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				31CEE7DBE6A697F60EA84096 /* BSTextDemoApp */,
@@ -156,7 +145,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F326E09477997A9DE0A1D019 /* BSTextDemoApp.xcodeproj in Resources */,
 				19B60B69159C0E59B0700B57 /* LaunchScreen.storyboard in Resources */,
 				9320EE5DAE5E53DDED73FB74 /* project.yml in Resources */,
 			);
@@ -170,6 +158,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6B27C54510DD5CA325BEE592 /* AppDelegate.swift in Sources */,
+				A9DDD42CBAF4EC9290C264E8 /* DemoViewControllers.swift in Sources */,
 				8AB741805ABE007735CF2649 /* SceneDelegate.swift in Sources */,
 				8432FD15EDCB5B65E936C1F5 /* ViewController.swift in Sources */,
 			);
