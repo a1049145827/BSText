@@ -197,8 +197,6 @@ class ResizeDemoViewController: UIViewController {
     }
     
     @objc private func handleTopLeftPan(_ gesture: UIPanGestureRecognizer) {
-        let translation = gesture.translation(in: view)
-        
         switch gesture.state {
         case .began:
             startPoint = gesture.location(in: view)
@@ -206,17 +204,21 @@ class ResizeDemoViewController: UIViewController {
             
         case .changed:
             let currentPoint = gesture.location(in: view)
-            let deltaX = startFrame.maxX - currentPoint.x
-            let deltaY = startFrame.maxY - currentPoint.y
+            let deltaX = currentPoint.x - startPoint.x
+            let deltaY = currentPoint.y - startPoint.y
             
-            var newWidth = startFrame.width + deltaX
-            var newHeight = startFrame.height + deltaY
+            var newWidth = startFrame.width - deltaX
+            var newHeight = startFrame.height - deltaY
             
             newWidth = max(minWidth, min(newWidth, maxWidth))
             newHeight = max(minHeight, min(newHeight, maxHeight))
             
             widthConstraint.constant = newWidth
             heightConstraint.constant = newHeight
+            
+            let newX = startFrame.maxX - newWidth
+            let newY = startFrame.maxY - newHeight
+            containerView.frame = CGRect(x: newX, y: newY, width: newWidth, height: newHeight)
             view.layoutIfNeeded()
             
         default:
@@ -225,8 +227,6 @@ class ResizeDemoViewController: UIViewController {
     }
     
     @objc private func handleTopRightPan(_ gesture: UIPanGestureRecognizer) {
-        let translation = gesture.translation(in: view)
-        
         switch gesture.state {
         case .began:
             startPoint = gesture.location(in: view)
@@ -234,17 +234,20 @@ class ResizeDemoViewController: UIViewController {
             
         case .changed:
             let currentPoint = gesture.location(in: view)
-            let deltaX = currentPoint.x - startFrame.minX
-            let deltaY = startFrame.maxY - currentPoint.y
+            let deltaX = currentPoint.x - startPoint.x
+            let deltaY = currentPoint.y - startPoint.y
             
             var newWidth = startFrame.width + deltaX
-            var newHeight = startFrame.height + deltaY
+            var newHeight = startFrame.height - deltaY
             
             newWidth = max(minWidth, min(newWidth, maxWidth))
             newHeight = max(minHeight, min(newHeight, maxHeight))
             
             widthConstraint.constant = newWidth
             heightConstraint.constant = newHeight
+            
+            let newY = startFrame.maxY - newHeight
+            containerView.frame = CGRect(x: startFrame.minX, y: newY, width: newWidth, height: newHeight)
             view.layoutIfNeeded()
             
         default:
@@ -253,8 +256,6 @@ class ResizeDemoViewController: UIViewController {
     }
     
     @objc private func handleBottomLeftPan(_ gesture: UIPanGestureRecognizer) {
-        let translation = gesture.translation(in: view)
-        
         switch gesture.state {
         case .began:
             startPoint = gesture.location(in: view)
@@ -262,10 +263,10 @@ class ResizeDemoViewController: UIViewController {
             
         case .changed:
             let currentPoint = gesture.location(in: view)
-            let deltaX = startFrame.maxX - currentPoint.x
-            let deltaY = currentPoint.y - startFrame.minY
+            let deltaX = currentPoint.x - startPoint.x
+            let deltaY = currentPoint.y - startPoint.y
             
-            var newWidth = startFrame.width + deltaX
+            var newWidth = startFrame.width - deltaX
             var newHeight = startFrame.height + deltaY
             
             newWidth = max(minWidth, min(newWidth, maxWidth))
@@ -273,6 +274,9 @@ class ResizeDemoViewController: UIViewController {
             
             widthConstraint.constant = newWidth
             heightConstraint.constant = newHeight
+            
+            let newX = startFrame.maxX - newWidth
+            containerView.frame = CGRect(x: newX, y: startFrame.minY, width: newWidth, height: newHeight)
             view.layoutIfNeeded()
             
         default:
@@ -288,8 +292,8 @@ class ResizeDemoViewController: UIViewController {
             
         case .changed:
             let currentPoint = gesture.location(in: view)
-            let deltaX = currentPoint.x - startFrame.minX
-            let deltaY = currentPoint.y - startFrame.minY
+            let deltaX = currentPoint.x - startPoint.x
+            let deltaY = currentPoint.y - startPoint.y
             
             var newWidth = startFrame.width + deltaX
             var newHeight = startFrame.height + deltaY
@@ -299,6 +303,7 @@ class ResizeDemoViewController: UIViewController {
             
             widthConstraint.constant = newWidth
             heightConstraint.constant = newHeight
+            containerView.frame = CGRect(x: startFrame.minX, y: startFrame.minY, width: newWidth, height: newHeight)
             view.layoutIfNeeded()
             
         default:
