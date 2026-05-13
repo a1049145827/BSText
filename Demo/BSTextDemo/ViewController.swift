@@ -57,6 +57,7 @@ class ViewController: UIViewController {
         addCodeEditorDemo(to: contentView, previousView: &previousView)
         addSyntaxHighlightDemo(to: contentView, previousView: &previousView)
         addAttachmentDemo(to: contentView, previousView: &previousView)
+        addResizeDemo(to: contentView, previousView: &previousView)
         
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -284,15 +285,49 @@ class ViewController: UIViewController {
             stackView.trailingAnchor.constraint(equalTo: section.contentView.trailingAnchor)
         ])
         
-        contentView.addSubview(section.view)
-        setupConstraints(previousView: previousView, currentView: section.view, contentView: contentView)
-        previousView = section.view
-        
         let bottomPadding = UIView()
         bottomPadding.translatesAutoresizingMaskIntoConstraints = false
         bottomPadding.heightAnchor.constraint(equalToConstant: 40).isActive = true
         contentView.addSubview(bottomPadding)
         setupConstraints(previousView: previousView, currentView: bottomPadding, contentView: contentView)
+    }
+    
+    func addResizeDemo(to contentView: UIView, previousView: inout UIView?) {
+        let section = createSection(title: "Resize Handle", subtitle: "拖拽调整大小")
+        
+        let textView = BSTextView()
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.layer.borderColor = UIColor.systemGray3.cgColor
+        textView.layer.borderWidth = 1
+        textView.layer.cornerRadius = 8
+        textView.font = .systemFont(ofSize: 16)
+        textView.textContainerInset = UIEdgeInsets(top: 12, left: 12, bottom: 32, right: 12)
+        textView.text = "拖拽底部滑块调整文本框大小..."
+        textView.isEditable = true
+        
+        let resizeHandle = UIView()
+        resizeHandle.translatesAutoresizingMaskIntoConstraints = false
+        resizeHandle.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        resizeHandle.heightAnchor.constraint(equalToConstant: 6).isActive = true
+        resizeHandle.backgroundColor = .systemGray4
+        resizeHandle.layer.cornerRadius = 3
+        
+        section.contentView.addSubview(textView)
+        textView.addSubview(resizeHandle)
+        
+        NSLayoutConstraint.activate([
+            textView.topAnchor.constraint(equalTo: section.titleLabel.bottomAnchor, constant: 12),
+            textView.leadingAnchor.constraint(equalTo: section.contentView.leadingAnchor),
+            textView.trailingAnchor.constraint(equalTo: section.contentView.trailingAnchor),
+            textView.heightAnchor.constraint(equalToConstant: 100),
+            
+            resizeHandle.centerXAnchor.constraint(equalTo: textView.centerXAnchor),
+            resizeHandle.bottomAnchor.constraint(equalTo: textView.bottomAnchor, constant: -6)
+        ])
+        
+        contentView.addSubview(section.view)
+        setupConstraints(previousView: previousView, currentView: section.view, contentView: contentView)
+        previousView = section.view
     }
     
     func createSection(title: String, subtitle: String) -> (view: UIView, titleLabel: UILabel, contentView: UIView) {
