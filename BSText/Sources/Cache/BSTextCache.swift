@@ -15,10 +15,18 @@ open class BSTextCache {
     public static let shared = BSTextCache()
 
     /// Maximum number of fragments to keep in memory.
-    public var maxFragmentCount: Int = 100
+    public var maxFragmentCount: Int = 100 {
+        didSet {
+            fragmentCache.countLimit = maxFragmentCount
+        }
+    }
 
     /// Maximum memory cost for image cache in bytes.
-    public var maxImageCacheCost: Int = 100 * 1024 * 1024 // 100MB
+    public var maxImageCacheCost: Int = 100 * 1024 * 1024 { // 100MB
+        didSet {
+            imageCache.totalCostLimit = maxImageCacheCost
+        }
+    }
 
     /// The underlying fragment cache.
     private let fragmentCache: NSCache<NSString, BSTextFragment> = {
@@ -30,7 +38,7 @@ open class BSTextCache {
     /// The underlying image cache.
     private let imageCache: NSCache<NSString, UIImage> = {
         let cache = NSCache<NSString, UIImage>()
-        cache.totalCostLimit = 100 * 1024 * 1024
+        cache.totalCostLimit = 100 * 1024 * 1024 // 100MB
         return cache
     }()
 
@@ -38,7 +46,8 @@ open class BSTextCache {
 
     // MARK: - Fragment Cache
 
-    /// Cache a text fragment.
+    /// Caches a text fragment.
+    ///
     /// - Parameters:
     ///   - fragment: The fragment to cache.
     ///   - key: The cache key.
@@ -46,14 +55,16 @@ open class BSTextCache {
         fragmentCache.setObject(fragment, forKey: key as NSString)
     }
 
-    /// Retrieve a cached fragment.
+    /// Retrieves a cached fragment.
+    ///
     /// - Parameter key: The cache key.
     /// - Returns: The cached fragment, or nil if not found.
     public func fragment(forKey key: String) -> BSTextFragment? {
         return fragmentCache.object(forKey: key as NSString)
     }
 
-    /// Remove a cached fragment.
+    /// Removes a cached fragment.
+    ///
     /// - Parameter key: The cache key.
     public func removeFragment(forKey key: String) {
         fragmentCache.removeObject(forKey: key as NSString)
@@ -61,7 +72,8 @@ open class BSTextCache {
 
     // MARK: - Image Cache
 
-    /// Cache a decoded image.
+    /// Caches a decoded image.
+    ///
     /// - Parameters:
     ///   - image: The decoded image.
     ///   - key: The cache key.
@@ -70,16 +82,18 @@ open class BSTextCache {
         imageCache.setObject(image, forKey: key as NSString, cost: cost)
     }
 
-    /// Retrieve a cached image.
+    /// Retrieves a cached image.
+    ///
     /// - Parameter key: The cache key.
     /// - Returns: The cached image, or nil if not found.
     public func image(forKey key: String) -> UIImage? {
         return imageCache.object(forKey: key as NSString)
     }
 
-    /// Remove all cached items.
+    /// Removes all cached items.
     public func removeAll() {
         fragmentCache.removeAllObjects()
         imageCache.removeAllObjects()
     }
 }
+
