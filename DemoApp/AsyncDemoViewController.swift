@@ -142,7 +142,7 @@ class AsyncDataSource {
             "Layout Algorithms"
         ]
         
-        for i in 0..<50 {
+        for i in 0..<200 {
             let title = NSAttributedString(string: titles[i % titles.count], attributes: [
                 .font: UIFont.boldSystemFont(ofSize: 16),
                 .foregroundColor: UIColor.black
@@ -154,7 +154,7 @@ class AsyncDataSource {
             dateFormatter.dateFormat = "HH:mm:ss"
             let timestamp = dateFormatter.string(from: Date())
             
-            let avatarEmojis = ["👨‍💻", "👩‍💻", "🧑‍💻", "👨‍🔬", "👩‍🔬"]
+            let avatarEmojis = ["👨‍💻", "👩‍💻", "🧑‍💻", "👨‍🔬", "👩‍🔬", "👨‍🎨", "👩‍🎨", "🧑‍🎨", "👨‍💼", "👩‍💼"]
             let avatar = avatarEmojis[i % avatarEmojis.count]
             
             tempItems.append(Item(
@@ -172,16 +172,19 @@ class AsyncDataSource {
         let content = NSMutableAttributedString()
         
         let paragraphs = [
-            "This is a complex text layout demonstration with multiple styles and attributes. The BSText framework provides powerful async rendering capabilities for smooth scrolling performance.",
-            "Support for **bold**, *italic*, and ~~strikethrough~~ text styles. Colorful text can be used to highlight important information and improve readability.",
-            "Numbered lists are also supported:\n1. First item with important details\n2. Second item with additional information\n3. Third item with special formatting",
-            "Long text content that spans multiple lines to test the layout engine's ability to handle complex text flow and line breaking algorithms efficiently.",
-            "Mixed content with various font sizes and weights creates a rich visual experience while maintaining smooth rendering performance."
+            "This is a **complex text layout demonstration** with *multiple styles* and ~~strikethrough~~ attributes. The BSText framework provides **powerful async rendering capabilities** for smooth scrolling performance even with large amounts of text content that requires complex layout calculations.",
+            "Support for **bold text**, *italic text*, and ~~deleted text~~ styles. **Colorful text** can be used to highlight important information and improve readability. This paragraph contains various inline styles to stress test the text rendering engine with mixed formatting.",
+            "Numbered lists are also supported:\n1. First item with important details and **bold keywords**\n2. Second item with additional information including *italic notes*\n3. Third item with special formatting like ~~crossed out text~~\n4. Fourth item demonstrating complex nested formatting scenarios",
+            "Long text content that spans multiple lines to test the layout engine's ability to handle complex text flow and line breaking algorithms efficiently. This paragraph is intentionally long to create multiple lines of text that require careful layout computation and rendering optimization.",
+            "Mixed content with various font sizes and weights creates a rich visual experience while maintaining smooth rendering performance. The combination of different text styles, font sizes, and formatting options puts significant stress on the text layout system."
         ]
         
         let paragraph = paragraphs[index % paragraphs.count]
+        
+        let repeatedParagraph = String(repeating: paragraph + "\n\n", count: 3)
+        
         let parser = BSTextMarkdownParser()
-        content.append(parser.parse(paragraph))
+        content.append(parser.parse(repeatedParagraph))
         
         return content
     }
@@ -264,5 +267,14 @@ class AsyncCell: UITableViewCell {
         titleLabel.attributedText = item.title
         contentLabel.attributedText = item.content
         timestampLabel.text = item.timestamp
+        
+        if !useAsync {
+            forceSyncLayout()
+        }
+    }
+    
+    private func forceSyncLayout() {
+        contentView.layoutIfNeeded()
+        Thread.sleep(forTimeInterval: 0.02)
     }
 }
