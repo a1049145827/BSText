@@ -170,7 +170,19 @@ class EditDemoViewController: UIViewController {
             if isItalic {
                 newFont = isBold ? .boldSystemFont(ofSize: existingFont.pointSize) : .systemFont(ofSize: existingFont.pointSize)
             } else {
-                newFont = isBold ? .boldItalicSystemFont(ofSize: existingFont.pointSize) : .italicSystemFont(ofSize: existingFont.pointSize)
+                if isBold {
+                    let descriptor = UIFont.systemFont(ofSize: existingFont.pointSize).fontDescriptor
+                    var boldItalicTraits = descriptor.symbolicTraits
+                    boldItalicTraits.insert(.traitBold)
+                    boldItalicTraits.insert(.traitItalic)
+                    if let boldItalicDescriptor = descriptor.withSymbolicTraits(boldItalicTraits) {
+                        newFont = UIFont(descriptor: boldItalicDescriptor, size: existingFont.pointSize)
+                    } else {
+                        newFont = .italicSystemFont(ofSize: existingFont.pointSize)
+                    }
+                } else {
+                    newFont = .italicSystemFont(ofSize: existingFont.pointSize)
+                }
             }
             
             textView.textStorage.beginEditing()
@@ -186,7 +198,19 @@ class EditDemoViewController: UIViewController {
             if isItalic {
                 newFont = isBold ? .boldSystemFont(ofSize: existingFont.pointSize) : .systemFont(ofSize: existingFont.pointSize)
             } else {
-                newFont = isBold ? .boldItalicSystemFont(ofSize: existingFont.pointSize) : .italicSystemFont(ofSize: existingFont.pointSize)
+                if isBold {
+                    let descriptor = UIFont.systemFont(ofSize: existingFont.pointSize).fontDescriptor
+                    var boldItalicTraits = descriptor.symbolicTraits
+                    boldItalicTraits.insert(.traitBold)
+                    boldItalicTraits.insert(.traitItalic)
+                    if let boldItalicDescriptor = descriptor.withSymbolicTraits(boldItalicTraits) {
+                        newFont = UIFont(descriptor: boldItalicDescriptor, size: existingFont.pointSize)
+                    } else {
+                        newFont = .italicSystemFont(ofSize: existingFont.pointSize)
+                    }
+                } else {
+                    newFont = .italicSystemFont(ofSize: existingFont.pointSize)
+                }
             }
             
             textView.typingAttributes[.font] = newFont
