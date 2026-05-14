@@ -164,35 +164,32 @@ class EditDemoViewController: UIViewController {
             
             let traits = existingFont.fontDescriptor.symbolicTraits
             let isItalic = traits.contains(.traitItalic)
+            let isBold = traits.contains(.traitBold)
             
-            var newTraits = traits
+            var newFont: UIFont
             if isItalic {
-                newTraits.remove(.traitItalic)
+                newFont = isBold ? .boldSystemFont(ofSize: existingFont.pointSize) : .systemFont(ofSize: existingFont.pointSize)
             } else {
-                newTraits.insert(.traitItalic)
+                newFont = isBold ? .boldItalicSystemFont(ofSize: existingFont.pointSize) : .italicSystemFont(ofSize: existingFont.pointSize)
             }
             
-            if let newDescriptor = existingFont.fontDescriptor.withSymbolicTraits(newTraits) {
-                let newFont = UIFont(descriptor: newDescriptor, size: existingFont.pointSize)
-                textView.textStorage.beginEditing()
-                textView.textStorage.addAttribute(.font, value: newFont, range: selectedRange)
-                textView.textStorage.endEditing()
-            }
+            textView.textStorage.beginEditing()
+            textView.textStorage.addAttribute(.font, value: newFont, range: selectedRange)
+            textView.textStorage.endEditing()
         } else {
             let existingFont = textView.typingAttributes[.font] as? UIFont ?? textView.font ?? .systemFont(ofSize: 16)
             let traits = existingFont.fontDescriptor.symbolicTraits
             let isItalic = traits.contains(.traitItalic)
+            let isBold = traits.contains(.traitBold)
             
-            var newTraits = traits
+            var newFont: UIFont
             if isItalic {
-                newTraits.remove(.traitItalic)
+                newFont = isBold ? .boldSystemFont(ofSize: existingFont.pointSize) : .systemFont(ofSize: existingFont.pointSize)
             } else {
-                newTraits.insert(.traitItalic)
+                newFont = isBold ? .boldItalicSystemFont(ofSize: existingFont.pointSize) : .italicSystemFont(ofSize: existingFont.pointSize)
             }
             
-            if let newDescriptor = existingFont.fontDescriptor.withSymbolicTraits(newTraits) {
-                textView.typingAttributes[.font] = UIFont(descriptor: newDescriptor, size: existingFont.pointSize)
-            }
+            textView.typingAttributes[.font] = newFont
         }
     }
 }
