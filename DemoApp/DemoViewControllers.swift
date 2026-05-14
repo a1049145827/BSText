@@ -112,33 +112,43 @@ class EditDemoViewController: UIViewController {
         let selectedRange = textView.selectedRange
         
         if selectedRange.length > 0 {
-            // 对选中的文本应用/移除加粗
-            let fontDescriptor = textView.font?.fontDescriptor
-            let isBold = fontDescriptor?.symbolicTraits.contains(.traitBold) ?? false
+            let existingFont = textView.textStorage.attribute(
+                .font,
+                at: selectedRange.location,
+                effectiveRange: nil
+            ) as? UIFont ?? textView.font ?? .systemFont(ofSize: 16)
             
-            let newFont: UIFont
+            let traits = existingFont.fontDescriptor.symbolicTraits
+            let isBold = traits.contains(.traitBold)
+            
+            var newTraits = traits
             if isBold {
-                newFont = UIFont.systemFont(ofSize: textView.font?.pointSize ?? 16)
+                newTraits.remove(.traitBold)
             } else {
-                newFont = UIFont.boldSystemFont(ofSize: textView.font?.pointSize ?? 16)
+                newTraits.insert(.traitBold)
             }
             
-            textView.textStorage.beginEditing()
-            textView.textStorage.addAttribute(.font, value: newFont, range: selectedRange)
-            textView.textStorage.endEditing()
+            if let newDescriptor = existingFont.fontDescriptor.withSymbolicTraits(newTraits) {
+                let newFont = UIFont(descriptor: newDescriptor, size: existingFont.pointSize)
+                textView.textStorage.beginEditing()
+                textView.textStorage.addAttribute(.font, value: newFont, range: selectedRange)
+                textView.textStorage.endEditing()
+            }
         } else {
-            // 对后续输入应用格式
-            let fontDescriptor = textView.typingAttributes[.font] as? UIFont ?? textView.font ?? .systemFont(ofSize: 16)
-            let isBold = fontDescriptor.fontDescriptor.symbolicTraits.contains(.traitBold)
+            let existingFont = textView.typingAttributes[.font] as? UIFont ?? textView.font ?? .systemFont(ofSize: 16)
+            let traits = existingFont.fontDescriptor.symbolicTraits
+            let isBold = traits.contains(.traitBold)
             
-            let newFont: UIFont
+            var newTraits = traits
             if isBold {
-                newFont = UIFont.systemFont(ofSize: fontDescriptor.pointSize)
+                newTraits.remove(.traitBold)
             } else {
-                newFont = UIFont.boldSystemFont(ofSize: fontDescriptor.pointSize)
+                newTraits.insert(.traitBold)
             }
             
-            textView.typingAttributes[.font] = newFont
+            if let newDescriptor = existingFont.fontDescriptor.withSymbolicTraits(newTraits) {
+                textView.typingAttributes[.font] = UIFont(descriptor: newDescriptor, size: existingFont.pointSize)
+            }
         }
     }
     
@@ -146,31 +156,43 @@ class EditDemoViewController: UIViewController {
         let selectedRange = textView.selectedRange
         
         if selectedRange.length > 0 {
-            let fontDescriptor = textView.font?.fontDescriptor
-            let isItalic = fontDescriptor?.symbolicTraits.contains(.traitItalic) ?? false
+            let existingFont = textView.textStorage.attribute(
+                .font,
+                at: selectedRange.location,
+                effectiveRange: nil
+            ) as? UIFont ?? textView.font ?? .systemFont(ofSize: 16)
             
-            let newFont: UIFont
+            let traits = existingFont.fontDescriptor.symbolicTraits
+            let isItalic = traits.contains(.traitItalic)
+            
+            var newTraits = traits
             if isItalic {
-                newFont = UIFont.systemFont(ofSize: textView.font?.pointSize ?? 16)
+                newTraits.remove(.traitItalic)
             } else {
-                newFont = UIFont.italicSystemFont(ofSize: textView.font?.pointSize ?? 16)
+                newTraits.insert(.traitItalic)
             }
             
-            textView.textStorage.beginEditing()
-            textView.textStorage.addAttribute(.font, value: newFont, range: selectedRange)
-            textView.textStorage.endEditing()
+            if let newDescriptor = existingFont.fontDescriptor.withSymbolicTraits(newTraits) {
+                let newFont = UIFont(descriptor: newDescriptor, size: existingFont.pointSize)
+                textView.textStorage.beginEditing()
+                textView.textStorage.addAttribute(.font, value: newFont, range: selectedRange)
+                textView.textStorage.endEditing()
+            }
         } else {
-            let fontDescriptor = textView.typingAttributes[.font] as? UIFont ?? textView.font ?? .systemFont(ofSize: 16)
-            let isItalic = fontDescriptor.fontDescriptor.symbolicTraits.contains(.traitItalic)
+            let existingFont = textView.typingAttributes[.font] as? UIFont ?? textView.font ?? .systemFont(ofSize: 16)
+            let traits = existingFont.fontDescriptor.symbolicTraits
+            let isItalic = traits.contains(.traitItalic)
             
-            let newFont: UIFont
+            var newTraits = traits
             if isItalic {
-                newFont = UIFont.systemFont(ofSize: fontDescriptor.pointSize)
+                newTraits.remove(.traitItalic)
             } else {
-                newFont = UIFont.italicSystemFont(ofSize: fontDescriptor.pointSize)
+                newTraits.insert(.traitItalic)
             }
             
-            textView.typingAttributes[.font] = newFont
+            if let newDescriptor = existingFont.fontDescriptor.withSymbolicTraits(newTraits) {
+                textView.typingAttributes[.font] = UIFont(descriptor: newDescriptor, size: existingFont.pointSize)
+            }
         }
     }
 }
