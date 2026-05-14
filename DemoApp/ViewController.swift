@@ -10,6 +10,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         ("Emoticon", "表情符号", "emoticon"),
         ("Tag", "标签视图", "tag"),
         ("Markdown", "Markdown", "markdown"),
+        ("Table", "表格支持", "table"),
         ("Highlight", "高亮搜索", "highlight"),
         ("CopyPaste", "复制粘贴", "copypaste"),
         ("UndoRedo", "撤销重做", "undoredo"),
@@ -71,6 +72,8 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             viewController = TagDemoViewController()
         case "markdown":
             viewController = MarkdownDemoViewController()
+        case "table":
+            viewController = TableDemoViewController()
         case "highlight":
             viewController = HighlightDemoViewController()
         case "copypaste":

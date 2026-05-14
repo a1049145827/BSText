@@ -349,3 +349,62 @@ class UndoRedoDemoViewController: UIViewController {
         ])
     }
 }
+
+class TableDemoViewController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .white
+        title = "Table Support"
+        
+        let textView = BSTextView()
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.isEditable = false
+        textView.font = .systemFont(ofSize: 16)
+        textView.layer.borderColor = UIColor.lightGray.cgColor
+        textView.layer.borderWidth = 1
+        textView.layer.cornerRadius = 8
+        view.addSubview(textView)
+        
+        let attributedText = NSMutableAttributedString()
+        
+        let titleAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.boldSystemFont(ofSize: 18)
+        ]
+        attributedText.append(NSAttributedString(string: "Markdown Table Demo\n\n", attributes: titleAttributes))
+        
+        // Create table from markdown
+        let markdownTable = """
+| Feature | Status | Priority |
+|:--------|:------:|---------:|
+| Rich Text | ✅ | High |
+| Markdown | ✅ | High |
+| Table | ✅ | Medium |
+| Syntax Highlight | ✅ | Medium |
+"""
+        
+        let tableAttachment = BSTextTableAttachment.tableAttachment(from: markdownTable)
+        tableAttachment.displaySize = CGSize(width: view.bounds.width - 32, height: 160)
+        
+        if let tableImage = tableAttachment.renderTable() {
+            tableAttachment.image = tableImage
+            attributedText.append(NSAttributedString(attachment: tableAttachment))
+        }
+        
+        attributedText.append(NSAttributedString(string: "\n\n"))
+        
+        let description = NSAttributedString(string: "This demonstrates BSText's table support. Tables are rendered as images within the text view.", attributes: [
+            .font: UIFont.systemFont(ofSize: 14),
+            .foregroundColor: UIColor.systemGray
+        ])
+        attributedText.append(description)
+        
+        textView.attributedText = attributedText
+        
+        NSLayoutConstraint.activate([
+            textView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            textView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            textView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            textView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+        ])
+    }
+}
