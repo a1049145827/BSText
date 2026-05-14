@@ -25,7 +25,10 @@ open class BSTextFragment: NSObject {
     public private(set) var isPrepared: Bool = false
 
     /// Decoration renderers attached to this fragment.
-    public var decorations: [BSTextDecoration] = []
+    public var decorationRenderers: [BSTextDecoration] = []
+    
+    /// Fragment decorations extracted from text attributes.
+    public var fragmentDecorations: [BSTextFragmentDecoration] = []
 
     /// Cache identifier for this fragment.
     public var cacheIdentifier: String {
@@ -69,20 +72,73 @@ open class BSTextFragment: NSObject {
     // MARK: - Preparation
 
     /// Asynchronously prepares this fragment for display.
-    open func prepareAsync() {
-        // TODO: Implement async glyph layout
-        // TODO: Decode attachments
-        // TODO: Prepare decorations
-        isPrepared = true
+    open func prepareAsync(completion: (() -> Void)? = nil) {
+        Task.detached(priority: .userInitiated) { [weak self] in
+            guard let self = self else { return }
+            
+            // Async glyph layout
+            self.ensureGlyphLayout()
+            
+            // Decode attachments
+            self.decodeAttachmentsAsync()
+            
+            // Prepare decorations
+            self.prepareDecorations()
+            
+            DispatchQueue.main.async {
+                self.isPrepared = true
+                completion?()
+            }
+        }
     }
 
     /// Synchronously prepares this fragment for display.
     open func prepare() {
         if !isPrepared {
-            // TODO: Implement sync glyph layout
-            // TODO: Prepare decorations
+            // Sync glyph layout
+            ensureGlyphLayout()
+            
+            // Decode attachments (sync version)
+            decodeAttachmentsSync()
+            
+            // Prepare decorations
+            prepareDecorations()
+            
             isPrepared = true
         }
+    }
+
+    /// Ensures glyph layout is complete for this fragment.
+    private func ensureGlyphLayout() {
+        let _ = textLayoutFragment.textLayoutManager?.ensureLayout(for: textLayoutFragment.rangeInElement)
+    }
+
+    /// Decodes attachments asynchronously.
+    private func decodeAttachmentsAsync() {
+        Task.detached(priority: .background) { [weak self] in
+            guard let self = self else { return }
+            self.decodeAttachments()
+        }
+    }
+
+    /// Decodes attachments synchronously.
+    private func decodeAttachmentsSync() {
+        decodeAttachments()
+    }
+
+    /// Decodes any attachments in this fragment.
+    private func decodeAttachments() {
+        // Note: In TextKit 2, attachments are handled by the layout manager
+        // during rendering. This is a placeholder for future implementation.
+    }
+
+    /// Prepares decorations for this fragment.
+    private func prepareDecorations() {
+        fragmentDecorations.removeAll()
+        
+        // Note: In TextKit 2, decorations are handled by the layout manager
+        // during rendering. This is a placeholder for future implementation.
+        // Actual decoration extraction would happen via the attributed string.
     }
 
     // MARK: - Rendering
@@ -91,12 +147,12 @@ open class BSTextFragment: NSObject {
     ///
     /// - Parameter context: The graphics context to render into.
     open func renderDecorations(in context: CGContext) {
-        guard !decorations.isEmpty else { return }
+        guard !decorationRenderers.isEmpty else { return }
 
         context.saveGState()
         defer { context.restoreGState() }
 
-        for decoration in decorations {
+        for decoration in decorationRenderers {
             decoration.render(in: context, fragment: self)
         }
     }

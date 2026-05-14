@@ -46,6 +46,13 @@ open class BSTextViewportController: NSObject {
     /// Delegate for receiving viewport notifications.
     public weak var delegate: BSTextViewportControllerDelegate?
 
+    /// The recycle threshold - fragments beyond this distance will be recycled.
+    /// Default is 400 points beyond prefetch area.
+    public var recycleThreshold: CGFloat = 400
+
+    /// Currently prepared fragments that can be recycled.
+    private var preparedFragments: Set<ObjectIdentifier> = []
+
     // MARK: - Initialization
 
     public override init() {
@@ -153,12 +160,52 @@ open class BSTextViewportController: NSObject {
 
     /// Recycles fragments that are far outside the visible area.
     private func recycleOffScreenFragments() {
-        // TODO: Implement fragment recycling
-        // This would involve:
-        // 1. Identifying fragments outside the prefetch rect
-        // 2. Moving them to a recycle pool
-        // 3. Reusing them when new fragments are needed
-        // Note: In TextKit 2, fragment recycling is typically handled internally
+        guard enabled, let layoutManager = layoutManager else { return }
+        
+        // Calculate the recycle rect (prefetch rect + recycle threshold)
+        let recycleRect = visibleRect.insetBy(dx: 0, dy: -(prefetchInset + recycleThreshold))
+        
+        var recycledCount = 0
+        
+        layoutManager.enumerateTextLayoutFragments(
+            from: layoutManager.textContentManager?.documentRange.location,
+            options: []
+        ) { fragment in
+            let fragmentFrame = fragment.layoutFragmentFrame
+            
+            // Check if fragment is outside the recycle rect
+            if !fragmentFrame.intersects(recycleRect) {
+                // Reset prepared state for fragments far outside viewport
+                self.invalidateFragment(fragment)
+                recycledCount += 1
+            }
+            
+            return true
+        }
+        
+        if recycledCount > 0 {
+            delegate?.viewportController?(self, didRecycleFragments: recycledCount)
+        }
+    }
+
+    /// Invalidates a specific fragment to free resources.
+    private func invalidateFragment(_ fragment: NSTextLayoutFragment) {
+        // Note: In TextKit 2, we don't directly destroy fragments.
+        // Instead, we let the system handle memory management.
+        // However, we can trigger re-layout which will clean up unused fragments.
+        
+        // Invalidate layout for this fragment's range
+        layoutManager?.invalidateLayout(for: fragment.rangeInElement)
+        
+        // Remove from our prepared set
+        let identifier = ObjectIdentifier(fragment)
+        preparedFragments.remove(identifier)
+    }
+
+    /// Marks a fragment as prepared.
+    internal func markFragmentPrepared(_ fragment: NSTextLayoutFragment) {
+        let identifier = ObjectIdentifier(fragment)
+        preparedFragments.insert(identifier)
     }
 
     // MARK: - Invalidation
