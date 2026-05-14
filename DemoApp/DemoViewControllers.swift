@@ -63,11 +63,13 @@ class AttributeDemoViewController: UIViewController {
 }
 
 class EditDemoViewController: UIViewController {
+    private var textView: BSTextView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         
-        let textView = BSTextView()
+        textView = BSTextView()
         textView.translatesAutoresizingMaskIntoConstraints = false
         textView.font = .systemFont(ofSize: 16)
         textView.layer.borderColor = UIColor.lightGray.cgColor
@@ -106,8 +108,71 @@ class EditDemoViewController: UIViewController {
         ])
     }
     
-    @objc func toggleBold() {}
-    @objc func toggleItalic() {}
+    @objc func toggleBold() {
+        let selectedRange = textView.selectedRange
+        
+        if selectedRange.length > 0 {
+            // 对选中的文本应用/移除加粗
+            let fontDescriptor = textView.font?.fontDescriptor
+            let isBold = fontDescriptor?.symbolicTraits.contains(.traitBold) ?? false
+            
+            let newFont: UIFont
+            if isBold {
+                newFont = UIFont.systemFont(ofSize: textView.font?.pointSize ?? 16)
+            } else {
+                newFont = UIFont.boldSystemFont(ofSize: textView.font?.pointSize ?? 16)
+            }
+            
+            textView.textStorage.beginEditing()
+            textView.textStorage.addAttribute(.font, value: newFont, range: selectedRange)
+            textView.textStorage.endEditing()
+        } else {
+            // 对后续输入应用格式
+            let fontDescriptor = textView.typingAttributes[.font] as? UIFont ?? textView.font ?? .systemFont(ofSize: 16)
+            let isBold = fontDescriptor.fontDescriptor.symbolicTraits.contains(.traitBold)
+            
+            let newFont: UIFont
+            if isBold {
+                newFont = UIFont.systemFont(ofSize: fontDescriptor.pointSize)
+            } else {
+                newFont = UIFont.boldSystemFont(ofSize: fontDescriptor.pointSize)
+            }
+            
+            textView.typingAttributes[.font] = newFont
+        }
+    }
+    
+    @objc func toggleItalic() {
+        let selectedRange = textView.selectedRange
+        
+        if selectedRange.length > 0 {
+            let fontDescriptor = textView.font?.fontDescriptor
+            let isItalic = fontDescriptor?.symbolicTraits.contains(.traitItalic) ?? false
+            
+            let newFont: UIFont
+            if isItalic {
+                newFont = UIFont.systemFont(ofSize: textView.font?.pointSize ?? 16)
+            } else {
+                newFont = UIFont.italicSystemFont(ofSize: textView.font?.pointSize ?? 16)
+            }
+            
+            textView.textStorage.beginEditing()
+            textView.textStorage.addAttribute(.font, value: newFont, range: selectedRange)
+            textView.textStorage.endEditing()
+        } else {
+            let fontDescriptor = textView.typingAttributes[.font] as? UIFont ?? textView.font ?? .systemFont(ofSize: 16)
+            let isItalic = fontDescriptor.fontDescriptor.symbolicTraits.contains(.traitItalic)
+            
+            let newFont: UIFont
+            if isItalic {
+                newFont = UIFont.systemFont(ofSize: fontDescriptor.pointSize)
+            } else {
+                newFont = UIFont.italicSystemFont(ofSize: fontDescriptor.pointSize)
+            }
+            
+            textView.typingAttributes[.font] = newFont
+        }
+    }
 }
 
 class EmoticonDemoViewController: UIViewController {
